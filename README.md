@@ -25,9 +25,14 @@ npm run build
 npm test
 ```
 
+### Deploy
+
+```
+npm run scripts/<deployment script> --network <network name>
+```
+
 ### Run linter
 
 ```
 npm run lint
 ```
-
