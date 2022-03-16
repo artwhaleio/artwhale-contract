@@ -1,0 +1,314 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0xc6787A05F9f2C79fe1C262429E9986DfeeF6E829",
+    "txHash": "0xf2640f59d818deb686777a89a738da960ca0164f5e4f6b3e5ca2901b212be63a"
+  },
+  "proxies": [
+    {
+      "address": "0x881Ab2c1492271Ff9575414D051488F66993e991",
+      "txHash": "0x6df5aa5f094371fa9a7894620076187bda8efb70faf56c490ccf16d2d449875d",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "72045a2dd29c9d2cec343100087284e33fafadec830440ffbf800782a3ae6d6e": {
+      "address": "0xDd98584ab27682663f410cce5b0BCf6164222F95",
+      "txHash": "0xad8912f63c30dde60ee5a32e0f45e8f86537daafd33c83e248f3490505f40caa",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:74"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155ReceiverUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol:48"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC721HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol:40"
+          },
+          {
+            "label": "_tradeFeePercent",
+            "offset": 0,
+            "slot": "351",
+            "type": "t_uint256",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:34"
+          },
+          {
+            "label": "_settlementTokens",
+            "offset": 0,
+            "slot": "352",
+            "type": "t_struct(AddressSet)2091_storage",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:35"
+          },
+          {
+            "label": "_whitelistErc721",
+            "offset": 0,
+            "slot": "354",
+            "type": "t_struct(AddressSet)2091_storage",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:36"
+          },
+          {
+            "label": "_whitelistErc1155",
+            "offset": 0,
+            "slot": "356",
+            "type": "t_struct(AddressSet)2091_storage",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:37"
+          },
+          {
+            "label": "_totalOrders",
+            "offset": 0,
+            "slot": "358",
+            "type": "t_struct(Counter)1343_storage",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:40"
+          },
+          {
+            "label": "_orders",
+            "offset": 0,
+            "slot": "359",
+            "type": "t_mapping(t_uint256,t_struct(Order)3635_storage)",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:41"
+          },
+          {
+            "label": "_ordersByStatus",
+            "offset": 0,
+            "slot": "360",
+            "type": "t_mapping(t_enum(OrderStatus)3608,t_struct(UintSet)2248_storage)",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:44"
+          },
+          {
+            "label": "_ordersByUserByStatus",
+            "offset": 0,
+            "slot": "361",
+            "type": "t_mapping(t_address,t_mapping(t_enum(OrderStatus)3608,t_struct(UintSet)2248_storage))",
+            "contract": "ArtBlockMarket",
+            "src": "contracts/ArtBlockMarket.sol:45"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_enum(NFTStandart)3612": {
+            "label": "enum IArtBlockMarket.NFTStandart",
+            "members": [
+              "NULL",
+              "ERC721",
+              "ERC1155"
+            ]
+          },
+          "t_enum(OrderStatus)3608": {
+            "label": "enum IArtBlockMarket.OrderStatus",
+            "members": [
+              "NULL",
+              "OPEN",
+              "CANCELLED",
+              "EXECUTED",
+              "ANY"
+            ]
+          },
+          "t_mapping(t_address,t_mapping(t_enum(OrderStatus)3608,t_struct(UintSet)2248_storage))": {
+            "label": "mapping(address => mapping(enum IArtBlockMarket.OrderStatus => struct EnumerableSetUpgradeable.UintSet))"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_enum(OrderStatus)3608,t_struct(UintSet)2248_storage)": {
+            "label": "mapping(enum IArtBlockMarket.OrderStatus => struct EnumerableSetUpgradeable.UintSet)"
+          },
+          "t_mapping(t_uint256,t_struct(Order)3635_storage)": {
+            "label": "mapping(uint256 => struct IArtBlockMarket.Order)"
+          },
+          "t_struct(AddressSet)2091_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)1790_storage"
+              }
+            ]
+          },
+          "t_struct(Counter)1343_storage": {
+            "label": "struct CountersUpgradeable.Counter",
+            "members": [
+              {
+                "label": "_value",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_struct(Order)3635_storage": {
+            "label": "struct IArtBlockMarket.Order",
+            "members": [
+              {
+                "label": "orderId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "nftStandart",
+                "type": "t_enum(NFTStandart)3612"
+              },
+              {
+                "label": "tokenContract",
+                "type": "t_address"
+              },
+              {
+                "label": "tokenId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "tokenAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "settlementToken",
+                "type": "t_address"
+              },
+              {
+                "label": "price",
+                "type": "t_uint256"
+              },
+              {
+                "label": "status",
+                "type": "t_enum(OrderStatus)3608"
+              },
+              {
+                "label": "seller",
+                "type": "t_address"
+              },
+              {
+                "label": "buyer",
+                "type": "t_address"
+              }
+            ]
+          },
+          "t_struct(Set)1790_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_struct(UintSet)2248_storage": {
+            "label": "struct EnumerableSetUpgradeable.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)1790_storage"
+              }
+            ]
+          },
+          "t_uint256": {
+            "label": "uint256"
+          }
+        }
+      }
+    }
+  }
+}

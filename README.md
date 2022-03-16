@@ -28,7 +28,7 @@ npm test
 ### Deploy
 
 ```
-npm run scripts/<deployment script> --network <network name>
+npx hardhat run scripts/<deployment script> --network <network name>
 ```
 
 ### Run linter
