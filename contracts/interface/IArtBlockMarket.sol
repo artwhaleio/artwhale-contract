@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 interface IArtBlockMarket {
 
     enum OrderStatus {NULL, OPEN, CANCELLED, EXECUTED, ANY}
+    enum OrderType {P2P, AUTHORITY}
     enum NFTStandart {NULL, ERC721, ERC1155}
 
     struct Order {
@@ -29,6 +30,7 @@ interface IArtBlockMarket {
         uint256 tokenAmount,
         address settlementToken,
         uint256 price,
+        OrderType orderType,
         uint256 timestamp
     );
     event CancelOrder(
@@ -37,7 +39,8 @@ interface IArtBlockMarket {
         uint256 timestamp
     );
     event ExecuteOrder(
-        address indexed user,
+        address indexed executor,
+        address indexed buyer,
         uint256 indexed orderId,
         uint256 fee,
         uint256 timestamp
@@ -56,16 +59,19 @@ interface IArtBlockMarket {
         uint256 tokenId,
         uint256 tokenAmount,
         address settlementToken,
-        uint256 price
+        uint256 price,
+        OrderType orderType
     ) external returns(uint256 orderId);
 
     function cancelOrder(uint256 orderId) external returns(bool success);
 
-    function executeOrder(uint256 orderId) external returns(bool success);
+    function executeOrder(uint256 orderId, address buyer) external returns(bool success);
 
     function orderDetails(uint256 orderId) external view returns(Order memory);
 
     function orderDetailsBatch(uint256[] memory orderIds) external view returns(Order[] memory);
+
+    function orderType(uint256 orderId) external view returns(OrderType);
 
     function totalOrders(OrderStatus byStatus) external view returns(uint256);
 

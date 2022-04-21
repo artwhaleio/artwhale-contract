@@ -94,6 +94,7 @@ contract('ArtBlockMarket', function (accounts) {
                 "1",
                 this.erc20.address,
                 orderPrice,
+                0,
                 {from: account1}
             );
 
@@ -136,6 +137,7 @@ contract('ArtBlockMarket', function (accounts) {
                 this.erc1155TokenAmount,
                 this.erc20.address,
                 orderPrice,
+                0,
                 {from: account1}
             );
 
@@ -188,6 +190,7 @@ contract('ArtBlockMarket', function (accounts) {
                 "1",
                 this.erc20.address,
                 orderPrice,
+                0,
                 {from: account1}
             );
 
@@ -206,7 +209,7 @@ contract('ArtBlockMarket', function (accounts) {
 
             await this.erc20.approve(this.marketplace.address, orderPrice, {from: account2});
 
-            const txReceipt = await this.marketplace.executeOrder("0", {from: account2});
+            const txReceipt = await this.marketplace.executeOrder("0", ZERO_ADDRESS, {from: account2});
 
             expect(_orderStructToDict(await this.marketplace.orderDetails.call(this.erc721TokenId))).to.deep.equal({
                 orderId: '0',
@@ -234,12 +237,13 @@ contract('ArtBlockMarket', function (accounts) {
                 this.erc1155TokenAmount,
                 this.erc20.address,
                 orderPrice,
+                0,
                 {from: account1}
             );
 
             await this.erc20.approve(this.marketplace.address, orderPrice, {from: account2});
 
-            const txReceipt = await this.marketplace.executeOrder("0", {from: account2});
+            const txReceipt = await this.marketplace.executeOrder("0", ZERO_ADDRESS, {from: account2});
 
             expect(_orderStructToDict(await this.marketplace.orderDetails.call(this.erc721TokenId))).to.deep.equal({
                 orderId: '0',

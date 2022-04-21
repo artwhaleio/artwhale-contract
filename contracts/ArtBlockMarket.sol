@@ -44,6 +44,8 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
     mapping(OrderStatus => EnumerableSetUpgradeable.UintSet) internal _ordersByStatus;
     mapping(address => mapping(OrderStatus => EnumerableSetUpgradeable.UintSet)) internal _ordersByUserByStatus;
 
+    // order type
+    mapping(uint256 => OrderType) internal _orderType;
 
     function initialize(address settlementToken, uint256 newTradeFeePercent) external override initializer {
         __Ownable_init();
@@ -63,7 +65,8 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
         uint256 tokenId,
         uint256 tokenAmount,
         address settlementToken,
-        uint256 price
+        uint256 price,
+        OrderType orderType
     ) external override nonReentrant returns(uint256 orderId) {
         require(nftStandart != NFTStandart.NULL, "ArtBlockMarket: wrong nft standart");
         require(tokenContract != address(0), "ArtBlockMarket: zero contract address");
@@ -92,6 +95,7 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
             seller: msg.sender,
             buyer: address(0)
         });
+        _orderType[newOrderId] = orderType;
         _totalOrders.increment();
 
         // change state for getters
@@ -113,6 +117,7 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
             tokenAmount,
             settlementToken,
             price,
+            orderType,
             block.timestamp
         );
 
@@ -150,7 +155,7 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
         return(true);
     }
 
-    function executeOrder(uint256 orderId) external override nonReentrant returns(bool success) {
+    function executeOrder(uint256 orderId, address buyer) external override nonReentrant returns(bool success) {
         require(orderId < _totalOrders.current(), "ArtBlockMarket: order does not exist");
 
         Order memory order = _orders[orderId];
@@ -158,17 +163,24 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
         require(order.status == OrderStatus.OPEN, "ArtBlockMarket: only for open orders");
         require(order.seller != msg.sender, "ArtBlockMarket: not for seller");
 
+        if (_orderType[orderId] == OrderType.P2P) {
+            require(buyer == address(0), "ArtBlockMarket: need zero buyer");
+            order.buyer = msg.sender;
+        } else {
+            require(msg.sender == owner(), "ArtBlockMarket: only for owner");
+            order.buyer = buyer;
+        }
         order.buyer = msg.sender;
         order.status = OrderStatus.EXECUTED;
         _orders[orderId] = order;
 
         uint256 fee = order.price.mul(_tradeFeePercent).div(100);
-        IERC20Upgradeable(order.settlementToken).safeTransferFrom(msg.sender, order.seller, order.price.sub(fee));
+        IERC20Upgradeable(order.settlementToken).safeTransferFrom(order.buyer, order.seller, order.price.sub(fee));
 
         if (order.nftStandart == NFTStandart.ERC721) {
-            IERC721Upgradeable(order.tokenContract).safeTransferFrom(address(this), msg.sender, order.tokenId);
+            IERC721Upgradeable(order.tokenContract).safeTransferFrom(address(this), order.buyer, order.tokenId);
         } else if (order.nftStandart == NFTStandart.ERC1155) {
-            IERC1155Upgradeable(order.tokenContract).safeTransferFrom(address(this), msg.sender, order.tokenId, order.tokenAmount, "");
+            IERC1155Upgradeable(order.tokenContract).safeTransferFrom(address(this), order.buyer, order.tokenId, order.tokenAmount, "");
         }
 
         // change state for getters
@@ -179,6 +191,7 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
 
         emit ExecuteOrder(
             msg.sender,
+            order.buyer,
             orderId,
             fee,
             block.timestamp
@@ -197,6 +210,10 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
             result[i] = _orders[orderIds[i]];
         }
         return(result);
+    }
+
+    function orderType(uint256 orderId) external view returns(OrderType) {
+        return(_orderType[orderId]);
     }
 
     function totalOrders(OrderStatus byStatus) external view override returns(uint256) {
