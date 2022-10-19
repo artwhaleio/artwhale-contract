@@ -2,7 +2,7 @@
 
 - Language: Solidity v0.8.10
 
-- Project framework: hardhat + truffle / web3
+- Project framework: hardhat (ethers) + typechain
 
 - Nodejs: v14.17.0
 
@@ -11,28 +11,22 @@
 
 1. Install packages
 ```
-npm i --save-dev
+yarn
 ```
 
 2. Build project
 ```
-npm run build
+yarn build
 ```
 
 ### Testing
 
 ```
-npm test
-```
-
-### Deploy
-
-```
-npx hardhat run scripts/<deployment script> --network <network name>
+yarn test
 ```
 
 ### Run linter
 
 ```
-npm run lint
+yarn lint
 ```
