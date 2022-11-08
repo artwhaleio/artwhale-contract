@@ -6,28 +6,39 @@ pragma solidity 0.8.10;
 // inheritance
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenOperator is Ownable {
+abstract contract TokenOperator is Ownable {
     address private _operator;
 
     event SetOperator(
-        address indexed sender_,
-        address indexed oldOperator_,
-        address indexed newOperator_,
-        uint256 timestamp_
+        address indexed sender,
+        address indexed oldOperator,
+        address indexed newOperator
     );
 
-    function setOperator(address newOperator_) public onlyOwner {
+    modifier onlyOperator() {
+        require(operator() == _msgSender(), "TokenOperator: caller is not the operator");
+        _;
+    }
+
+    constructor(address newOperator_) {
+        _setOperator(newOperator_);
+    }
+
+    function setOperator(address newOperator_) public virtual onlyOwner {
+        _setOperator(newOperator_);
+    }
+
+    function operator() public view virtual returns(address) {
+        return _operator;
+    }
+
+    function _setOperator(address newOperator_) internal {
         emit SetOperator({
-            sender_: msg.sender,
-            oldOperator_: _operator,
-            newOperator_: newOperator_,
-            timestamp_: block.timestamp
+            sender: msg.sender,
+            oldOperator: _operator,
+            newOperator: newOperator_
         });
 
         _operator = newOperator_;
-    }
-
-    function operator() public view returns(address) {
-        return _operator;
     }
 }

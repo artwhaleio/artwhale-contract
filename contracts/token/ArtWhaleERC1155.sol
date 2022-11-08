@@ -7,14 +7,19 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/TokenOperator.sol";
 
 // libs
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
-contract ArtBlockERC1155 is ERC1155, ERC1155Supply, EIP712, ERC2981, Ownable, TokenOperator {
+contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperator {
+
+    using Address for address payable;
+
+    // solhint-disable-next-line var-name-mixedcase
+    bytes32 public constant MINT_TYPEHASH =
+        keccak256("Mint(address target_,uint256 tokenId_,uint256 tokenAmount_,uint256 mintPrice_,uint256 nonce_,uint256 deadline_)");
 
     string public name;
     string public symbol;
@@ -26,69 +31,65 @@ contract ArtBlockERC1155 is ERC1155, ERC1155Supply, EIP712, ERC2981, Ownable, To
         address indexed target,
         uint256 indexed tokenId,
         uint256 indexed tokenAmount,
+        uint256 mintPrice,
         uint256 nonce,
         uint256 deadline,
         bytes signature
     );
 
-    // solhint-disable-next-line var-name-mixedcase
-    bytes32 public constant MINT_TYPEHASH =
-        keccak256("Mint(address target,uint256 tokenId,uint256 tokenAmount,uint256 nonce,uint256 deadline)");
-
     constructor(
         string memory name_,
         string memory symbol_,
         string memory uri_,
-        address royaltyReceiver,
-        uint96 royaltyFeeNumerator
-    ) ERC1155("") EIP712(name_, "1") {
+        address operator_
+    ) ERC1155("") EIP712(name_, "1") TokenOperator(operator_) {
         name = name_;
         symbol = symbol_;
         _setURI(uri_);
-        _setupRoyaltyERC2981(royaltyReceiver, royaltyFeeNumerator);
     }
 
-    function setupRoyaltyERC2981(address royaltyReceiver, uint96 royaltyFeeNumerator) external onlyOwner {
-        _setupRoyaltyERC2981(royaltyReceiver, royaltyFeeNumerator);
-    }
-
-    function setURI(string memory newuri) public virtual onlyOwner {
+    function setURI(string memory newuri) public virtual onlyOperator {
         _setURI(newuri);
     }
 
     function mint(
-        address target,
-        uint256 tokenId,
-        uint256 tokenAmount,
-        uint256 nonce,
-        uint256 deadline,
-        bytes memory signature
-    ) public virtual {
-        require(!nonces[nonce], "ArtBlockERC1155: nonce already used");
-        require(block.timestamp <= deadline, "ArtBlockERC1155: expired deadline");
+        address target_,
+        uint256 tokenId_,
+        uint256 tokenAmount_,
+        uint256 mintPrice_,
+        uint256 nonce_,
+        uint256 deadline_,
+        bytes memory signature_
+    ) public payable virtual {
+        require(!nonces[nonce_], "ArtWhaleERC1155: nonce already used");
+        require(block.timestamp <= deadline_, "ArtWhaleERC1155: expired deadline");
+        require(msg.value == mintPrice_, "ArtWhaleERC1155: wrong mint price");
 
-        bytes32 structHash = keccak256(abi.encode(MINT_TYPEHASH, target, tokenId, tokenAmount, nonce, deadline));
+        payable(operator()).sendValue(msg.value);
+
+        bytes32 structHash = keccak256(abi.encode(MINT_TYPEHASH, target_, tokenId_, tokenAmount_, nonce_, deadline_));
 
         bytes32 digest = _hashTypedDataV4(structHash);
 
-        require(SignatureChecker.isValidSignatureNow(operator(), digest, signature), "ArtBlockERC1155: invalid signature");
+        require(SignatureChecker.isValidSignatureNow(operator(), digest, signature_), "ArtWhaleERC1155: invalid signature");
 
-        _mint(target, tokenId, tokenAmount, "0x");
+        _mint(target_, tokenId_, tokenAmount_, "0x");
 
         emit Mint({
-            target: target,
-            tokenId: tokenId,
-            tokenAmount: tokenAmount,
-            nonce: nonce,
-            deadline: deadline,
-            signature: signature   
+            target: target_,
+            tokenId: tokenId_,
+            tokenAmount: tokenAmount_,
+            mintPrice: mintPrice_,
+            nonce: nonce_,
+            deadline: deadline_,
+            signature: signature_
         });
     }
 
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC1155, ERC2981)
+        override(ERC1155)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -97,12 +98,6 @@ contract ArtBlockERC1155 is ERC1155, ERC1155Supply, EIP712, ERC2981, Ownable, To
     //
     // internal methods
     //
-
-    function _setupRoyaltyERC2981(address receiver, uint96 feeNumerator) internal {
-        if (receiver != address(0)) {
-            _setDefaultRoyalty(receiver, feeNumerator);
-        }
-    }
 
     function _beforeTokenTransfer(
         address operator_,

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-interface IArtBlockMarket {
+interface IArtWhaleMarket {
 
     enum OrderStatus {NULL, OPEN, CANCELLED, EXECUTED, ANY}
     enum OrderType {P2P, AUTHORITY}

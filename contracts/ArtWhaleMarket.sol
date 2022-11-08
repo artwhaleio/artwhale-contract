@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpg
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./interface/IArtBlockMarket.sol";
+import "./interface/IArtWhaleMarket.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
@@ -21,8 +21,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 
-contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1155HolderUpgradeable, ERC721HolderUpgradeable {
+
+contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1155HolderUpgradeable, ERC721HolderUpgradeable {
     using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
@@ -68,18 +70,18 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
         uint256 price,
         OrderType orderType
     ) external override nonReentrant returns(uint256 orderId) {
-        require(nftStandart != NFTStandart.NULL, "ArtBlockMarket: wrong nft standart");
-        require(tokenContract != address(0), "ArtBlockMarket: zero contract address");
+        require(nftStandart != NFTStandart.NULL, "ArtWhaleMarket: wrong nft standart");
+        require(tokenContract != address(0), "ArtWhaleMarket: zero contract address");
         if (nftStandart == NFTStandart.ERC721) {
-            require(_whitelistErc721.contains(tokenContract), "ArtBlockMarket: nft not registered");
-            require(tokenAmount == 1, "ArtBlockMarket: wrong token amount");
+            require(_whitelistErc721.contains(tokenContract), "ArtWhaleMarket: nft not registered");
+            require(tokenAmount == 1, "ArtWhaleMarket: wrong token amount");
         } else if (nftStandart == NFTStandart.ERC1155) {
-            require(_whitelistErc1155.contains(tokenContract), "ArtBlockMarket: nft not registered");
-            require(tokenAmount >= 1, "ArtBlockMarket: wrong token amount");
+            require(_whitelistErc1155.contains(tokenContract), "ArtWhaleMarket: nft not registered");
+            require(tokenAmount >= 1, "ArtWhaleMarket: wrong token amount");
         }
-        require(settlementToken != address(0), "ArtBlockMarket: zero trade token address");
-        require(_settlementTokens.contains(settlementToken), "ArtBlockMarket: settlement token not registered");
-        require(price > 0.0001 ether, "ArtBlockMarket: wrong price");
+        require(settlementToken != address(0), "ArtWhaleMarket: zero trade token address");
+        require(_settlementTokens.contains(settlementToken), "ArtWhaleMarket: settlement token not registered");
+        require(price > 0.0001 ether, "ArtWhaleMarket: wrong price");
 
         // create order
         uint256 newOrderId = _totalOrders.current();    
@@ -125,12 +127,12 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
     }
 
     function cancelOrder(uint256 orderId) external override nonReentrant returns(bool success) {
-        require(orderId < _totalOrders.current(), "ArtBlockMarket: order does not exist");
+        require(orderId < _totalOrders.current(), "ArtWhaleMarket: order does not exist");
 
         Order memory order = _orders[orderId];
 
-        require(order.status == OrderStatus.OPEN, "ArtBlockMarket: only for open orders");
-        require(order.seller == msg.sender, "ArtBlockMarket: sender is not the seller");
+        require(order.status == OrderStatus.OPEN, "ArtWhaleMarket: only for open orders");
+        require(order.seller == msg.sender, "ArtWhaleMarket: sender is not the seller");
 
         _orders[orderId].status = OrderStatus.CANCELLED;
 
@@ -156,18 +158,18 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
     }
 
     function executeOrder(uint256 orderId, address buyer) external override nonReentrant returns(bool success) {
-        require(orderId < _totalOrders.current(), "ArtBlockMarket: order does not exist");
+        require(orderId < _totalOrders.current(), "ArtWhaleMarket: order does not exist");
 
         Order memory order = _orders[orderId];
 
-        require(order.status == OrderStatus.OPEN, "ArtBlockMarket: only for open orders");
-        require(order.seller != msg.sender, "ArtBlockMarket: not for seller");
+        require(order.status == OrderStatus.OPEN, "ArtWhaleMarket: only for open orders");
+        require(order.seller != msg.sender, "ArtWhaleMarket: not for seller");
 
         if (_orderType[orderId] == OrderType.P2P) {
-            require(buyer == address(0), "ArtBlockMarket: need zero buyer");
+            require(buyer == address(0), "ArtWhaleMarket: need zero buyer");
             order.buyer = msg.sender;
         } else {
-            require(msg.sender == owner(), "ArtBlockMarket: only for owner");
+            require(msg.sender == owner(), "ArtWhaleMarket: only for owner");
             order.buyer = buyer;
         }
         order.buyer = msg.sender;
@@ -175,6 +177,8 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
         _orders[orderId] = order;
 
         uint256 fee = order.price.mul(_tradeFeePercent).div(100);
+        // запрос роялти
+
         IERC20Upgradeable(order.settlementToken).safeTransferFrom(order.buyer, order.seller, order.price.sub(fee));
 
         if (order.nftStandart == NFTStandart.ERC721) {
@@ -264,7 +268,7 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
     //
 
     function addSettlementToken(address erc20) external override nonReentrant onlyOwner returns(bool success) {
-        require(IERC20MetadataUpgradeable(erc20).decimals() == 18, "ArtBlockMarket: wrong erc20 decimals");
+        require(IERC20MetadataUpgradeable(erc20).decimals() == 18, "ArtWhaleMarket: wrong erc20 decimals");
         _settlementTokens.add(erc20);
         return(true);
     }
@@ -341,7 +345,7 @@ contract ArtBlockMarket is IArtBlockMarket, Initializable, OwnableUpgradeable, R
     // internal functions
 
     function _setTradeFeePercent(uint256 newTradeFeePercent) internal {
-        require(newTradeFeePercent >= 0 && newTradeFeePercent <= 100, "ArtBlockMarket: wrong percent value");
+        require(newTradeFeePercent >= 0 && newTradeFeePercent <= 100, "ArtWhaleMarket: wrong percent value");
         _tradeFeePercent = newTradeFeePercent;
     }
 
