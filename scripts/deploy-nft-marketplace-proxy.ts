@@ -1,5 +1,4 @@
 import { ethers, upgrades } from "hardhat";
-import { ethers } from "hardhat";
 
 const MARKETPLACE_SETTLEMENT_TOKEN = process.env.MARKETPLACE_SETTLEMENT_TOKEN || "";
 const MARKETPLACE_TRADE_FEE_PERCENT = process.env.MARKETPLACE_TRADE_FEE_PERCENT || "";
