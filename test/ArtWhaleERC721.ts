@@ -43,7 +43,7 @@ describe("ArtWhaleERC721", () => {
             uri: "/",
             mintPrice: "0",
             nonce: 0,
-            deadline: "1669291763",
+            deadline: "2669291763",
         }
     
         const signature = signers[0]._signTypedData(domain, types, value);
@@ -54,7 +54,7 @@ describe("ArtWhaleERC721", () => {
             "/",
             "0",
             "0",
-            "1669291763",
+            "2669291763",
             signature
         );
 

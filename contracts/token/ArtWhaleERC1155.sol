@@ -67,7 +67,7 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
 
         payable(operator()).sendValue(msg.value);
 
-        bytes32 structHash = keccak256(abi.encode(MINT_TYPEHASH, target_, tokenId_, tokenAmount_, nonce_, deadline_));
+        bytes32 structHash = keccak256(abi.encode(MINT_TYPEHASH, target_, tokenId_, tokenAmount_, mintPrice_, nonce_, deadline_));
 
         bytes32 digest = _hashTypedDataV4(structHash);
 
