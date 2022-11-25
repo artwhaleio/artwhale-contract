@@ -19,7 +19,7 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 public constant MINT_TYPEHASH =
-        keccak256("Mint(address target_,uint256 tokenId_,uint256 tokenAmount_,uint256 mintPrice_,uint256 nonce_,uint256 deadline_)");
+        keccak256("Mint(address target,uint256 tokenId,uint256 tokenAmount,uint256 mintPrice,uint256 nonce,uint256 deadline)");
 
     string public name;
     string public symbol;

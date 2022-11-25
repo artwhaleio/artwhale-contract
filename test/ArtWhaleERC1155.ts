@@ -28,26 +28,26 @@ describe("ArtWhaleERC1155", () => {
     
         const types = {
             Mint : [
-                {name: "target_", type: "address"},
-                {name: "tokenId_", type: "uint256"},
-                {name: "tokenAmount_", type: "uint256"},
-                {name: "mintPrice_", type: "uint256"},
-                {name: "nonce_", type: "uint256"},
-                {name: "deadline_", type: "uint256"},
+                {name: "target", type: "address"},
+                {name: "tokenId", type: "uint256"},
+                {name: "tokenAmount", type: "uint256"},
+                {name: "mintPrice", type: "uint256"},
+                {name: "nonce", type: "uint256"},
+                {name: "deadline", type: "uint256"},
             ]
         }
     
         const value = {
-            target_: signers[1].address,
-            tokenId_: "0",
-            tokenAmount_: "1",
-            mintPrice_: "0",
-            nonce_: 0,
-            deadline_: "2669291763",
+            target: signers[1].address,
+            tokenId: "0",
+            tokenAmount: "1",
+            mintPrice: "0",
+            nonce: 0,
+            deadline: "2669291763",
         }
     
         const signature = signers[0]._signTypedData(domain, types, value);
-
+        
         await erc1155SignatureMint.connect(signers[1]).mint(
             signers[1].address,
             "0",
@@ -57,6 +57,8 @@ describe("ArtWhaleERC1155", () => {
             "2669291763",
             signature
         );
+
+        return;
 
         console.log(await erc1155SignatureMint.balanceOf(signers[1].address, 0));
     });
