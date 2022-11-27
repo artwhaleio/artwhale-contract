@@ -15,6 +15,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import "./interface/IRoyalty.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -22,6 +23,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
 
 contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable, ERC1155HolderUpgradeable, ERC721HolderUpgradeable {
@@ -176,11 +178,25 @@ contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, R
         order.status = OrderStatus.EXECUTED;
         _orders[orderId] = order;
 
-        uint256 fee = order.price.mul(_tradeFeePercent).div(100);
-        // запрос роялти
+        // get fund from the buyer
+        IERC20Upgradeable(order.settlementToken).safeTransferFrom(order.buyer, address(this), order.price);
 
-        IERC20Upgradeable(order.settlementToken).safeTransferFrom(order.buyer, order.seller, order.price.sub(fee));
+        // paying
+        uint256 royaltyFee = 0;
+        if (ERC165CheckerUpgradeable.supportsInterface(order.tokenContract, type(IRoyalty).interfaceId)) {
+            (address[] memory receiver, uint256[] memory amount, uint256 total) = IRoyalty(order.tokenContract).calculateRoyalty(order.tokenId, order.price);
 
+            for (uint256 i = 0; i < receiver.length; i++) {
+                IERC20Upgradeable(order.settlementToken).safeTransfer(receiver[i], amount[i]);
+            }
+
+            royaltyFee = total;
+        }
+        uint256 tradeFee = order.price.mul(_tradeFeePercent).div(100);
+        require(order.price > royaltyFee.add(tradeFee), "ArtWhaleMarket: incorrect fee/royalty calculation");
+        IERC20Upgradeable(order.settlementToken).safeTransfer(owner(), tradeFee);
+
+        // sends nft
         if (order.nftStandart == NFTStandart.ERC721) {
             IERC721Upgradeable(order.tokenContract).safeTransferFrom(address(this), order.buyer, order.tokenId);
         } else if (order.nftStandart == NFTStandart.ERC1155) {
@@ -197,7 +213,8 @@ contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, R
             msg.sender,
             order.buyer,
             orderId,
-            fee,
+            royaltyFee,
+            tradeFee,
             block.timestamp
         );
 

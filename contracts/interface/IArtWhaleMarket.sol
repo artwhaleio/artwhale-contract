@@ -42,6 +42,7 @@ interface IArtWhaleMarket {
         address indexed executor,
         address indexed buyer,
         uint256 indexed orderId,
+        uint256 royaltyFee,
         uint256 fee,
         uint256 timestamp
     );

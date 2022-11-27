@@ -9,11 +9,12 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/TokenOperator.sol";
+import "./lib/Royalty.sol";
 
 // libs
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
-contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperator {
+contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperator, Royalty {
 
     using Address for address payable;
 
@@ -41,11 +42,13 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
         string memory name_,
         string memory symbol_,
         string memory uri_,
-        address operator_
+        address operator_,
+        RoyaltyInfo[] memory defaultRoyaltyInfo_
     ) ERC1155("") EIP712(name_, "1") TokenOperator(operator_) {
         name = name_;
         symbol = symbol_;
         _setURI(uri_);
+        _setDefaultRoyalty(defaultRoyaltyInfo_);
     }
 
     function setURI(string memory newuri) public virtual onlyOperator {
@@ -86,13 +89,13 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
         });
     }
 
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(bytes4 interfaceId_)
         public
         view
         override(ERC1155)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
     }
 
     //

@@ -10,12 +10,13 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/TokenOperator.sol";
+import "./lib/Royalty.sol";
 
 // libs
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-contract ArtWhaleERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, EIP712, Ownable, TokenOperator {
+contract ArtWhaleERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, EIP712, Ownable, TokenOperator, Royalty {
 
     using Address for address payable;
 
@@ -38,8 +39,12 @@ contract ArtWhaleERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, EIP712, O
     constructor(
         string memory name_,
         string memory symbol_,
-        address operator_
-    ) ERC721(name_, symbol_) EIP712(name_, "1") TokenOperator(operator_) {}
+        address operator_,
+        RoyaltyInfo[] memory defaultRoyaltyInfo_
+    ) ERC721(name_, symbol_) EIP712(name_, "1") TokenOperator(operator_) {
+
+        _setDefaultRoyalty(defaultRoyaltyInfo_);
+    }
 
     function setURI(uint256 tokenId_, string memory uri_) public virtual onlyOperator {
         _setTokenURI(tokenId_, uri_);
@@ -95,7 +100,7 @@ contract ArtWhaleERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, EIP712, O
         override(ERC721, ERC721Enumerable)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId_);
+        return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
     }
 
     //
@@ -111,6 +116,6 @@ contract ArtWhaleERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, EIP712, O
 
     function _burn(uint256 tokenId_) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId_);
-        // _resetTokenRoyalty(tokenId_);
+        _resetTokenRoyalty(tokenId_);
     }
 }
