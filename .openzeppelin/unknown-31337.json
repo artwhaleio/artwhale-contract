@@ -2,19 +2,94 @@
   "manifestVersion": "3.2",
   "admin": {
     "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "txHash": "0xa5c99ae30da133650fa6dbd66abf27691289c649a266998809557fd7dda398d6"
+    "txHash": "0xbc513e7f90b0a50baa67a6151a0ea8ad98a951c2a1082339cd077db3d3a66d71"
   },
   "proxies": [
     {
+      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "txHash": "0xeb3e4f5a8bc73d0ef8de315522ace511e84820e1d28a6b933389a8cbe309f847",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+      "txHash": "0x0bdd9bd1e22fc3affd0128e1e4ccb4b7923df56afb43069c05d7a6838fbc2ada",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "txHash": "0xd692bdb735527578e66dbb29eee67a01115d1f22dc98a06b6bf841449ba46155",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+      "txHash": "0xa529a4ebadd5b02d61d5739891137fe697e5a9cc41a439b76a2e7ee40c6fb147",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "txHash": "0x063b1ee428614e36134c628481c3d46e37dda14f0e3f97150a6093372caf98e4",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x9A676e781A523b5d0C0e43731313A708CB607508",
+      "txHash": "0xd5af71b5fdbd3498a3079689635dae43b18716316c4f38622bad975c7de3037b",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+      "txHash": "0xfd6d8a1da25f9109244a52db66187fb5c0dd3d0909310ca78e102738e9365412",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+      "txHash": "0x97035fe8de79eb91e0ef5f1a15dfc5ad3ff880eda82f7db95c87895ddb797daa",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+      "txHash": "0x1ef71dc7fbc26f4effa8b077dc7c50387e46f52d26699b86ebe162f4a93d3bb4",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      "txHash": "0x59d8aa4d95a662292bcf09786b6e90f107f13bb4717844beed9e62ab575f7b27",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "txHash": "0x355b20bc3632e37cc9603ccfdb88e85d30db45b3df7012c2e1c75a194d3f7e81",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+      "txHash": "0xb23a30ae83c8742420b1c6cf540992a374efed0acff61b12e8a10b6b1927b2cd",
+      "kind": "transparent"
+    },
+    {
       "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-      "txHash": "0xf4eee507c99d9469bb47d1c624cfd40568a5bac9ab00f56abe34e17e80dac492",
+      "txHash": "0x301f41ec0b269ff596c7ec1af528d9dade6bc10605a91d5b65ef485ede97f079",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+      "txHash": "0xadd51bf20de2beb65b420857cf8e43e98668608a08e42b9b8434408500ca519d",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+      "txHash": "0xbf801c0df67029db9a905e86fe48316fcb62dcce89a5119f029ae5d9ad442c78",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf5059a5D33d5853360D16C683c16e67980206f36",
+      "txHash": "0x45b4bcb44b8db82a569d9f62b40bdac9853d15b4063b3875725e12ff309111e2",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "0d9b0188ee5187f225b261a4c21550d9bab6d91e3a2f1ca707e4560ce3f4344c": {
+    "559a8595c53fe0cb77e0c4c906fa252348fbfd8cc66673fdd927ab3741448f2d": {
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      "txHash": "0x446d6e2c636df975f212ada02e8f45ee25ebb48e0fc76af0665a017ceaa2261d",
+      "txHash": "0xbc7621a09151de955c2374a5c17e8aaa945c781e92ad25a3f1ef415115ddabe2",
       "layout": {
         "solcVersion": "0.8.10",
         "storage": [
@@ -112,72 +187,72 @@
             "offset": 0,
             "slot": "351",
             "type": "t_uint256",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:34"
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:38"
           },
           {
             "label": "_settlementTokens",
             "offset": 0,
             "slot": "352",
-            "type": "t_struct(AddressSet)2356_storage",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:35"
+            "type": "t_struct(AddressSet)2569_storage",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:39"
           },
           {
             "label": "_whitelistErc721",
             "offset": 0,
             "slot": "354",
-            "type": "t_struct(AddressSet)2356_storage",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:36"
+            "type": "t_struct(AddressSet)2569_storage",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:40"
           },
           {
             "label": "_whitelistErc1155",
             "offset": 0,
             "slot": "356",
-            "type": "t_struct(AddressSet)2356_storage",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:37"
+            "type": "t_struct(AddressSet)2569_storage",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:41"
           },
           {
             "label": "_totalOrders",
             "offset": 0,
             "slot": "358",
-            "type": "t_struct(Counter)1594_storage",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:40"
+            "type": "t_struct(Counter)1613_storage",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:44"
           },
           {
             "label": "_orders",
             "offset": 0,
             "slot": "359",
-            "type": "t_mapping(t_uint256,t_struct(Order)8556_storage)",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:41"
+            "type": "t_mapping(t_uint256,t_struct(Order)4304_storage)",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:45"
           },
           {
             "label": "_ordersByStatus",
             "offset": 0,
             "slot": "360",
-            "type": "t_mapping(t_enum(OrderStatus)8526,t_struct(UintSet)2513_storage)",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:44"
+            "type": "t_mapping(t_enum(OrderStatus)4274,t_struct(UintSet)2726_storage)",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:48"
           },
           {
             "label": "_ordersByUserByStatus",
             "offset": 0,
             "slot": "361",
-            "type": "t_mapping(t_address,t_mapping(t_enum(OrderStatus)8526,t_struct(UintSet)2513_storage))",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:45"
+            "type": "t_mapping(t_address,t_mapping(t_enum(OrderStatus)4274,t_struct(UintSet)2726_storage))",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:49"
           },
           {
             "label": "_orderType",
             "offset": 0,
             "slot": "362",
-            "type": "t_mapping(t_uint256,t_enum(OrderType)8529)",
-            "contract": "ArtBlockMarket",
-            "src": "contracts/ArtBlockMarket.sol:48"
+            "type": "t_mapping(t_uint256,t_enum(OrderType)4277)",
+            "contract": "ArtWhaleMarket",
+            "src": "contracts/ArtWhaleMarket.sol:52"
           }
         ],
         "types": {
@@ -205,8 +280,8 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_enum(NFTStandart)8533": {
-            "label": "enum IArtBlockMarket.NFTStandart",
+          "t_enum(NFTStandart)4281": {
+            "label": "enum IArtWhaleMarket.NFTStandart",
             "members": [
               "NULL",
               "ERC721",
@@ -214,8 +289,8 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(OrderStatus)8526": {
-            "label": "enum IArtBlockMarket.OrderStatus",
+          "t_enum(OrderStatus)4274": {
+            "label": "enum IArtWhaleMarket.OrderStatus",
             "members": [
               "NULL",
               "OPEN",
@@ -225,47 +300,47 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(OrderType)8529": {
-            "label": "enum IArtBlockMarket.OrderType",
+          "t_enum(OrderType)4277": {
+            "label": "enum IArtWhaleMarket.OrderType",
             "members": [
               "P2P",
               "AUTHORITY"
             ],
             "numberOfBytes": "1"
           },
-          "t_mapping(t_address,t_mapping(t_enum(OrderStatus)8526,t_struct(UintSet)2513_storage))": {
-            "label": "mapping(address => mapping(enum IArtBlockMarket.OrderStatus => struct EnumerableSetUpgradeable.UintSet))",
+          "t_mapping(t_address,t_mapping(t_enum(OrderStatus)4274,t_struct(UintSet)2726_storage))": {
+            "label": "mapping(address => mapping(enum IArtWhaleMarket.OrderStatus => struct EnumerableSetUpgradeable.UintSet))",
             "numberOfBytes": "32"
           },
           "t_mapping(t_bytes32,t_uint256)": {
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_enum(OrderStatus)8526,t_struct(UintSet)2513_storage)": {
-            "label": "mapping(enum IArtBlockMarket.OrderStatus => struct EnumerableSetUpgradeable.UintSet)",
+          "t_mapping(t_enum(OrderStatus)4274,t_struct(UintSet)2726_storage)": {
+            "label": "mapping(enum IArtWhaleMarket.OrderStatus => struct EnumerableSetUpgradeable.UintSet)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_enum(OrderType)8529)": {
-            "label": "mapping(uint256 => enum IArtBlockMarket.OrderType)",
+          "t_mapping(t_uint256,t_enum(OrderType)4277)": {
+            "label": "mapping(uint256 => enum IArtWhaleMarket.OrderType)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Order)8556_storage)": {
-            "label": "mapping(uint256 => struct IArtBlockMarket.Order)",
+          "t_mapping(t_uint256,t_struct(Order)4304_storage)": {
+            "label": "mapping(uint256 => struct IArtWhaleMarket.Order)",
             "numberOfBytes": "32"
           },
-          "t_struct(AddressSet)2356_storage": {
+          "t_struct(AddressSet)2569_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)2041_storage",
+                "type": "t_struct(Set)2254_storage",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Counter)1594_storage": {
+          "t_struct(Counter)1613_storage": {
             "label": "struct CountersUpgradeable.Counter",
             "members": [
               {
@@ -277,8 +352,8 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(Order)8556_storage": {
-            "label": "struct IArtBlockMarket.Order",
+          "t_struct(Order)4304_storage": {
+            "label": "struct IArtWhaleMarket.Order",
             "members": [
               {
                 "label": "orderId",
@@ -288,7 +363,7 @@
               },
               {
                 "label": "nftStandart",
-                "type": "t_enum(NFTStandart)8533",
+                "type": "t_enum(NFTStandart)4281",
                 "offset": 0,
                 "slot": "1"
               },
@@ -324,7 +399,7 @@
               },
               {
                 "label": "status",
-                "type": "t_enum(OrderStatus)8526",
+                "type": "t_enum(OrderStatus)4274",
                 "offset": 0,
                 "slot": "6"
               },
@@ -343,7 +418,7 @@
             ],
             "numberOfBytes": "256"
           },
-          "t_struct(Set)2041_storage": {
+          "t_struct(Set)2254_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
@@ -361,12 +436,12 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UintSet)2513_storage": {
+          "t_struct(UintSet)2726_storage": {
             "label": "struct EnumerableSetUpgradeable.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)2041_storage",
+                "type": "t_struct(Set)2254_storage",
                 "offset": 0,
                 "slot": "0"
               }

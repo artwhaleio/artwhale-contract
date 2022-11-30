@@ -41,8 +41,8 @@ contract ArtWhaleERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, EIP712, O
         string memory symbol_,
         address operator_,
         RoyaltyInfo[] memory defaultRoyaltyInfo_
-    ) ERC721(name_, symbol_) EIP712(name_, "1") TokenOperator(operator_) {
-
+    ) ERC721(name_, symbol_) EIP712(name_, "1") {
+        _setOperator(operator_);
         _setDefaultRoyalty(defaultRoyaltyInfo_);
     }
 

@@ -51,6 +51,9 @@ contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, R
     // order type
     mapping(uint256 => OrderType) internal _orderType;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     function initialize(address settlementToken, uint256 newTradeFeePercent) external override initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
@@ -83,7 +86,7 @@ contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, R
         }
         require(settlementToken != address(0), "ArtWhaleMarket: zero trade token address");
         require(_settlementTokens.contains(settlementToken), "ArtWhaleMarket: settlement token not registered");
-        require(price > 0.0001 ether, "ArtWhaleMarket: wrong price");
+        require(price > 0, "ArtWhaleMarket: wrong price");
 
         // create order
         uint256 newOrderId = _totalOrders.current();    
@@ -195,6 +198,7 @@ contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, R
         uint256 tradeFee = order.price.mul(_tradeFeePercent).div(100);
         require(order.price > royaltyFee.add(tradeFee), "ArtWhaleMarket: incorrect fee/royalty calculation");
         IERC20Upgradeable(order.settlementToken).safeTransfer(owner(), tradeFee);
+        IERC20Upgradeable(order.settlementToken).safeTransfer(order.seller, order.price.sub(royaltyFee).sub(tradeFee));
 
         // sends nft
         if (order.nftStandart == NFTStandart.ERC721) {

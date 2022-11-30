@@ -16,7 +16,18 @@ abstract contract Royalty is Ownable, IRoyalty {
     // public methods
     //
 
-    function calculateRoyalty(uint256 tokenId_, uint256 salePrice_) public view virtual returns (address[] memory, uint256[] memory, uint256) {
+    function setDefaultRoyalty(RoyaltyInfo[] memory defaultRoyaltyInfo_) public virtual override onlyOwner {
+        _setDefaultRoyalty(defaultRoyaltyInfo_);
+    }
+
+    function setTokenRoyalty(
+        uint256 tokenId_,
+        RoyaltyInfo[] memory royalty_
+    ) public virtual override onlyOwner {
+        _setTokenRoyalty(tokenId_, royalty_);
+    }
+
+    function calculateRoyalty(uint256 tokenId_, uint256 salePrice_) public view virtual override returns (address[] memory, uint256[] memory, uint256) {
         // token royalty or default royalty
         RoyaltyInfo[] memory royalty = _tokenRoyaltyInfo[tokenId_];
         if (royalty.length == 0) {
@@ -36,17 +47,12 @@ abstract contract Royalty is Ownable, IRoyalty {
         return (targets, amounts, totalSum);
     }
 
-    function defaultRoyaltyInfo() public view virtual returns(RoyaltyInfo[] memory) {
+    function defaultRoyaltyInfo() public view virtual override returns(RoyaltyInfo[] memory) {
         return _defaultRoyaltyInfo;
     }
 
-    function tokenRoyaltyInfo(uint256 tokenId_) public view virtual returns(RoyaltyInfo[] memory) {
+    function tokenRoyaltyInfo(uint256 tokenId_) public view virtual override returns(RoyaltyInfo[] memory) {
         return _tokenRoyaltyInfo[tokenId_];
-    }
-
-    function a(RoyaltyInfo[] memory defaultRoyaltyInfo_) public virtual {
-        _setTokenRoyalty(0, defaultRoyaltyInfo_);
-        _setDefaultRoyalty(defaultRoyaltyInfo_);
     }
 
     //
@@ -61,6 +67,12 @@ abstract contract Royalty is Ownable, IRoyalty {
         for (uint256 i = 0; i < defaultRoyaltyInfo_.length; i++) {
             _defaultRoyaltyInfo.push(defaultRoyaltyInfo_[i]);
         }
+
+        emit SetDefaultRoyalty({
+            sender: msg.sender,
+            defaultRoyaltyInfo: defaultRoyaltyInfo_
+        });
+
     }
 
     function _resetDefaultRoyalty() internal virtual {
@@ -78,6 +90,12 @@ abstract contract Royalty is Ownable, IRoyalty {
         for (uint256 i = 0; i < royalty_.length; i++) {
             _tokenRoyaltyInfo[tokenId_].push(royalty_[i]);
         }
+
+        emit SetTokenRoyalty({
+            sender: msg.sender,
+            tokenId: tokenId_,
+            defaultRoyaltyInfo: royalty_
+        });
     }
 
     function _resetTokenRoyalty(uint256 tokenId) internal virtual {

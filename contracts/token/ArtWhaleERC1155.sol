@@ -44,10 +44,11 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
         string memory uri_,
         address operator_,
         RoyaltyInfo[] memory defaultRoyaltyInfo_
-    ) ERC1155("") EIP712(name_, "1") TokenOperator(operator_) {
+    ) ERC1155("") EIP712(name_, "1") {
         name = name_;
         symbol = symbol_;
         _setURI(uri_);
+        _setOperator(operator_);
         _setDefaultRoyalty(defaultRoyaltyInfo_);
     }
 

@@ -32,16 +32,6 @@ contract ERC1155Token is ERC1155, Ownable, ERC1155Supply {
         return _symbol;
     }
 
-    function totalTokens() public view returns (uint256) {
-        return _totalTokens;
-    }
-
-    function createToken(uint256 tokenCount) public onlyOwner {
-        _totalTokens += tokenCount;
-
-        emit CreateToken(msg.sender, tokenCount, block.timestamp);
-    }
-
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
@@ -66,8 +56,5 @@ contract ERC1155Token is ERC1155, Ownable, ERC1155Supply {
     {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
 
-        for (uint256 i = 0; i < ids.length; ++i) {
-            require(ids[i] < _totalTokens, "ERC1155Token: id does not exist");
-        }
     }
 }

@@ -1,22 +1,22 @@
 import { ethers } from "hardhat";
 import { tryVerify } from "../../helpers/tryVerify";
-import { ERC721Token } from "../../typechain-types/contracts/token/ERC721Token";
+import { ArtWhaleERC721Mock } from "../../typechain-types/contracts/token/ArtWhaleERC721Mock";
 
 const ERC721_TOKEN_NAME = process.env.ERC721_TOKEN_NAME || "";
 const ERC721_TOKEN_SYMBOL = process.env.ERC721_TOKEN_SYMBOL || "";
 
 async function main() {
 
-  const ERC721TokenFactory = await ethers.getContractFactory("ERC721Token");
+  const ArtWhaleERC721MockFactory = await ethers.getContractFactory("ArtWhaleERC721Mock");
 
-  const erc721Token = await ERC721TokenFactory.deploy(
+  const erc721Token = await ArtWhaleERC721MockFactory.deploy(
     ERC721_TOKEN_NAME,
     ERC721_TOKEN_SYMBOL
-  ) as ERC721Token;
+  ) as ArtWhaleERC721Mock;
 
   await tryVerify(erc721Token.address);
 
-  console.log("ERC721Token deployed: ", erc721Token.address);
+  console.log("ArtWhaleERC721Mock deployed: ", erc721Token.address);
 }
 
 main()
