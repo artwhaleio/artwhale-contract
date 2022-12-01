@@ -173,7 +173,7 @@ contract ArtWhaleERC1155 is
 
     function supportsInterface(
         bytes4 interfaceId_
-    ) public view override(ERC1155Upgradeable) returns (bool) {
+    ) public view virtual override(ERC1155Upgradeable) returns (bool) {
         return
             interfaceId_ == type(IRoyalty).interfaceId ||
             super.supportsInterface(interfaceId_);
@@ -186,7 +186,7 @@ contract ArtWhaleERC1155 is
     function setApprovalForAll(
         address operator_,
         bool approved_
-    ) public override onlyAllowedOperatorApproval(operator_) {
+    ) public virtual override onlyAllowedOperatorApproval(operator_) {
         super.setApprovalForAll(operator_, approved_);
     }
 
@@ -196,7 +196,7 @@ contract ArtWhaleERC1155 is
         uint256 tokenId_,
         uint256 amount_,
         bytes memory data_
-    ) public override onlyAllowedOperator(from_) {
+    ) public virtual override onlyAllowedOperator(from_) {
         super.safeTransferFrom(from_, to_, tokenId_, amount_, data_);
     }
 

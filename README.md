@@ -1,4 +1,4 @@
-# artblock-marketplace-contracts
+# artwhale-marketplace-contracts
 
 - Language: Solidity v0.8.13
 

@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import { tryVerify } from "../helpers/tryVerify";
-import { ArtWhaleERC1155 } from "../typechain-types/contracts/token/ArtWhaleERC1155";
+import { tryVerify } from "../../helpers/tryVerify";
+import { ArtWhaleERC1155 } from "../../typechain-types/contracts/token/ArtWhaleERC1155";
 
 
 async function main() {

@@ -3,10 +3,10 @@ import { tryVerify } from "../helpers/tryVerify";
 import { ArtWhaleERC721 } from "../typechain-types/contracts/token/ArtWhaleERC721";
 import { ArtWhaleERC1155 } from "../typechain-types/contracts/token/ArtWhaleERC1155";
 
-const ERC721_TOKEN_NAME = process.env.ERC721_TOKEN_NAME || "";
-const ERC721_TOKEN_SYMBOL = process.env.ERC721_TOKEN_SYMBOL || "";
-const ERC1155_TOKEN_NAME = process.env.ERC1155_TOKEN_NAME || "";
-const ERC1155_TOKEN_SYMBOL = process.env.ERC1155_TOKEN_SYMBOL || "";
+const ARTWHALE_ERC721_NAME = process.env.ARTWHALE_ERC721_NAME || "";
+const ARTWHALE_ERC721_SYMBOL = process.env.ARTWHALE_ERC721_SYMBOL || "";
+const ARTWHALE_ERC1155_NAME = process.env.ARTWHALE_ERC1155_NAME || "";
+const ARTWHALE_ERC1155_SYMBOL = process.env.ARTWHALE_ERC1155_SYMBOL || "";
 const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS || "";
 
 async function main() {
@@ -14,8 +14,8 @@ async function main() {
   console.log("deploy ArtWhaleERC721...");
   const ArtWhaleERC721Factory = await ethers.getContractFactory("ArtWhaleERC721");
   const ArtWhaleERC721 = await ArtWhaleERC721Factory.deploy(
-    ERC721_TOKEN_NAME,
-    ERC721_TOKEN_SYMBOL,
+    ARTWHALE_ERC721_NAME,
+    ARTWHALE_ERC721_SYMBOL,
     OPERATOR_ADDRESS
   ) as ArtWhaleERC721;
   console.log("ArtWhaleERC721 deployed: ", ArtWhaleERC721.address);
@@ -24,8 +24,8 @@ async function main() {
   console.log("deploy ArtWhaleERC1155...");
   const ArtWhaleERC1155Factory = await ethers.getContractFactory("ArtWhaleERC1155");
   const ArtWhaleERC1155 = await ArtWhaleERC1155Factory.deploy(
-    ERC1155_TOKEN_NAME,
-    ERC1155_TOKEN_SYMBOL,
+    ARTWHALE_ERC1155_NAME,
+    ARTWHALE_ERC1155_SYMBOL,
     "",
     OPERATOR_ADDRESS
   ) as ArtWhaleERC1155;

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpg
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./interface/IArtWhaleMarket.sol";
+import "./interface/IArtWhaleMarketplace.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
@@ -25,8 +25,8 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-contract ArtWhaleMarket is
-    IArtWhaleMarket,
+contract ArtWhaleMarketplace is
+    IArtWhaleMarketplace,
     Initializable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -88,34 +88,34 @@ contract ArtWhaleMarket is
     ) external override nonReentrant returns (uint256 orderId) {
         require(
             nftStandart != NFTStandart.NULL,
-            "ArtWhaleMarket: wrong nft standart"
+            "ArtWhaleMarketplace: wrong nft standart"
         );
         require(
             tokenContract != address(0),
-            "ArtWhaleMarket: zero contract address"
+            "ArtWhaleMarketplace: zero contract address"
         );
         if (nftStandart == NFTStandart.ERC721) {
             require(
                 _whitelistErc721.contains(tokenContract),
-                "ArtWhaleMarket: nft not registered"
+                "ArtWhaleMarketplace: nft not registered"
             );
-            require(tokenAmount == 1, "ArtWhaleMarket: wrong token amount");
+            require(tokenAmount == 1, "ArtWhaleMarketplace: wrong token amount");
         } else if (nftStandart == NFTStandart.ERC1155) {
             require(
                 _whitelistErc1155.contains(tokenContract),
-                "ArtWhaleMarket: nft not registered"
+                "ArtWhaleMarketplace: nft not registered"
             );
-            require(tokenAmount >= 1, "ArtWhaleMarket: wrong token amount");
+            require(tokenAmount >= 1, "ArtWhaleMarketplace: wrong token amount");
         }
         require(
             settlementToken != address(0),
-            "ArtWhaleMarket: zero trade token address"
+            "ArtWhaleMarketplace: zero trade token address"
         );
         require(
             _settlementTokens.contains(settlementToken),
-            "ArtWhaleMarket: settlement token not registered"
+            "ArtWhaleMarketplace: settlement token not registered"
         );
-        require(price > 0, "ArtWhaleMarket: wrong price");
+        require(price > 0, "ArtWhaleMarketplace: wrong price");
 
         // create order
         uint256 newOrderId = _totalOrders.current();
@@ -175,18 +175,18 @@ contract ArtWhaleMarket is
     ) external override nonReentrant returns (bool success) {
         require(
             orderId < _totalOrders.current(),
-            "ArtWhaleMarket: order does not exist"
+            "ArtWhaleMarketplace: order does not exist"
         );
 
         Order memory order = _orders[orderId];
 
         require(
             order.status == OrderStatus.OPEN,
-            "ArtWhaleMarket: only for open orders"
+            "ArtWhaleMarketplace: only for open orders"
         );
         require(
             order.seller == msg.sender,
-            "ArtWhaleMarket: sender is not the seller"
+            "ArtWhaleMarketplace: sender is not the seller"
         );
 
         _orders[orderId].status = OrderStatus.CANCELLED;
@@ -224,22 +224,22 @@ contract ArtWhaleMarket is
     ) external override nonReentrant returns (bool success) {
         require(
             orderId < _totalOrders.current(),
-            "ArtWhaleMarket: order does not exist"
+            "ArtWhaleMarketplace: order does not exist"
         );
 
         Order memory order = _orders[orderId];
 
         require(
             order.status == OrderStatus.OPEN,
-            "ArtWhaleMarket: only for open orders"
+            "ArtWhaleMarketplace: only for open orders"
         );
-        require(order.seller != msg.sender, "ArtWhaleMarket: not for seller");
+        require(order.seller != msg.sender, "ArtWhaleMarketplace: not for seller");
 
         if (_orderType[orderId] == OrderType.P2P) {
-            require(buyer == address(0), "ArtWhaleMarket: need zero buyer");
+            require(buyer == address(0), "ArtWhaleMarketplace: need zero buyer");
             order.buyer = msg.sender;
         } else {
-            require(msg.sender == owner(), "ArtWhaleMarket: only for owner");
+            require(msg.sender == owner(), "ArtWhaleMarketplace: only for owner");
             order.buyer = buyer;
         }
         order.buyer = msg.sender;
@@ -282,7 +282,7 @@ contract ArtWhaleMarket is
         uint256 tradeFee = order.price.mul(_tradeFeePercent).div(100);
         require(
             order.price > royaltyFee.add(tradeFee),
-            "ArtWhaleMarket: incorrect fee/royalty calculation"
+            "ArtWhaleMarketplace: incorrect fee/royalty calculation"
         );
         IERC20Upgradeable(order.settlementToken).safeTransfer(
             owner(),
@@ -417,7 +417,7 @@ contract ArtWhaleMarket is
     ) external override nonReentrant onlyOwner returns (bool success) {
         require(
             IERC20MetadataUpgradeable(erc20).decimals() == 18,
-            "ArtWhaleMarket: wrong erc20 decimals"
+            "ArtWhaleMarketplace: wrong erc20 decimals"
         );
         _settlementTokens.add(erc20);
         return (true);
@@ -445,7 +445,9 @@ contract ArtWhaleMarket is
         return (_settlementTokens.values());
     }
 
+    //
     // nft whitelist
+    //
 
     function addToWhitelistErc721(
         address erc721
@@ -529,7 +531,7 @@ contract ArtWhaleMarket is
     function _setTradeFeePercent(uint256 newTradeFeePercent) internal {
         require(
             newTradeFeePercent >= 0 && newTradeFeePercent <= 100,
-            "ArtWhaleMarket: wrong percent value"
+            "ArtWhaleMarketplace: wrong percent value"
         );
         _tradeFeePercent = newTradeFeePercent;
     }

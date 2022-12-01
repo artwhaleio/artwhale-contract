@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { ethers, upgrades } from 'hardhat'
 import { BigNumber, ContractFactory } from "ethers";
-import { ArtWhaleMarket } from "../typechain-types/contracts/ArtWhaleMarket";
+import { ArtWhaleMarketplace } from "../typechain-types/contracts/ArtWhaleMarketplace";
 import { ERC20TokenMock } from "../typechain-types/contracts/mocks/ERC20TokenMock";
 import { ArtWhaleERC721Mock } from "../typechain-types/contracts/mocks/ArtWhaleERC721Mock";
 import { ArtWhaleERC1155Mock } from "../typechain-types/contracts/mocks/ArtWhaleERC1155Mock";
@@ -27,28 +27,28 @@ const NFTStandart = {
     ERC1155: "2",
 }
 
-describe("ArtWhaleMarket", () => {
+describe("ArtWhaleMarketplace", () => {
 
     let signers: SignerWithAddress[];
-    let artWhaleMarket: ArtWhaleMarket;
+    let artWhaleMarketplace: ArtWhaleMarketplace;
     let erc20: ERC20TokenMock;
     let erc721: ArtWhaleERC721Mock;
     let erc1155: ArtWhaleERC1155Mock;
-    let ArtWhaleMarketFactory: ContractFactory
+    let ArtWhaleMarketplaceFactory: ContractFactory
     let ERC20TokenMockFactory: ContractFactory
     let ArtWhaleERC721MockFactory: ContractFactory
     let ArtWhaleERC1155MockFactory: ContractFactory
 
     beforeEach(async () => {
         signers = await ethers.getSigners();
-        ArtWhaleMarketFactory = await ethers.getContractFactory("ArtWhaleMarket");
+        ArtWhaleMarketplaceFactory = await ethers.getContractFactory("ArtWhaleMarketplace");
         ERC20TokenMockFactory = await ethers.getContractFactory("ERC20TokenMock");
         ArtWhaleERC721MockFactory = await ethers.getContractFactory("ArtWhaleERC721Mock");
         ArtWhaleERC1155MockFactory = await ethers.getContractFactory("ArtWhaleERC1155Mock");
     });
 
     it('check state after deployment', async () => {
-        // console.log(await artWhaleMarket.owner())
+        // console.log(await artWhaleMarketplace.owner())
     });
 
     describe('order system', () => {
@@ -58,28 +58,28 @@ describe("ArtWhaleMarket", () => {
         // signers[3] -> royalty recipient
 
         beforeEach(async () => {
-            artWhaleMarket = await upgrades.deployProxy(ArtWhaleMarketFactory, [
+            artWhaleMarketplace = await upgrades.deployProxy(ArtWhaleMarketplaceFactory, [
                 ethers.constants.AddressZero,
                 BigNumber.from('0'),
-            ]) as ArtWhaleMarket;
-            await artWhaleMarket.deployed();
+            ]) as ArtWhaleMarketplace;
+            await artWhaleMarketplace.deployed();
 
             // settlement token
             erc20 = await ERC20TokenMockFactory.deploy("erc20Test", "ERC20TEST") as ERC20TokenMock;
             await erc20.deployed();
-            await artWhaleMarket.addSettlementToken(erc20.address);
+            await artWhaleMarketplace.addSettlementToken(erc20.address);
             await erc20.mintTo(signers[2].address, ethers.utils.parseEther('10000'));
 
             // erc721 nft
             erc721 = await ArtWhaleERC721MockFactory.deploy("erc721Test", "ERC721TEST") as ArtWhaleERC721Mock;
             await erc721.deployed();
-            await artWhaleMarket.addToWhitelistErc721(erc721.address);
+            await artWhaleMarketplace.addToWhitelistErc721(erc721.address);
             await erc721.mintTo(signers[1].address, 1, 'ipfs://');  // tokenId = 1
             await erc721.mintTo(signers[1].address, 2, 'ipfs://');  // tokenId = 2
 
             // erc1155 nft
             erc1155 = await ArtWhaleERC1155MockFactory.deploy("erc1155Test", "ERC1155TEST") as ArtWhaleERC1155Mock;
-            await artWhaleMarket.addToWhitelistErc1155(erc1155.address);
+            await artWhaleMarketplace.addToWhitelistErc1155(erc1155.address);
             await erc1155.deployed();
             await erc1155.mintTo(signers[1].address, 1, ethers.utils.parseEther('10000'));
 
@@ -87,8 +87,8 @@ describe("ArtWhaleMarket", () => {
 
         describe('execute p2p order', () => {
             beforeEach(async () => {
-                await erc721.connect(signers[1]).setApprovalForAll(artWhaleMarket.address, true);
-                await artWhaleMarket.connect(signers[1]).createOrder(
+                await erc721.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
+                await artWhaleMarketplace.connect(signers[1]).createOrder(
                     NFTStandart.ERC721,
                     erc721.address,
                     1,
@@ -98,8 +98,8 @@ describe("ArtWhaleMarket", () => {
                     OrderType.P2P
                 );  // orderId = 0
 
-                await erc1155.connect(signers[1]).setApprovalForAll(artWhaleMarket.address, true);
-                await artWhaleMarket.connect(signers[1]).createOrder(
+                await erc1155.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
+                await artWhaleMarketplace.connect(signers[1]).createOrder(
                     NFTStandart.ERC1155,
                     erc1155.address,
                     1,
@@ -109,21 +109,21 @@ describe("ArtWhaleMarket", () => {
                     OrderType.P2P
                 );  // orderId = 1
 
-                await erc20.connect(signers[2]).approve(artWhaleMarket.address, ethers.utils.parseEther('1000000000'));
+                await erc20.connect(signers[2]).approve(artWhaleMarketplace.address, ethers.utils.parseEther('1000000000'));
             });
             it('with royalty & comission', async () => {
                 await erc721.setDefaultRoyalty([{
                     receiver: signers[3].address,
                     royaltyFraction: BigNumber.from('100')
                 }]); // 1%
-                await artWhaleMarket.setTradeFeePercent('2'); // 2%
+                await artWhaleMarketplace.setTradeFeePercent('2'); // 2%
                 
-                expect(await erc721.ownerOf(1)).to.equal(artWhaleMarket.address);
+                expect(await erc721.ownerOf(1)).to.equal(artWhaleMarketplace.address);
                 let balanceBeforeSeller = await erc20.balanceOf(signers[1].address);
                 let balanceBeforeBuyer = await erc20.balanceOf(signers[2].address);
                 let balanceBeforeCreator = await erc20.balanceOf(signers[3].address);
 
-                await artWhaleMarket.connect(signers[2]).executeOrder(
+                await artWhaleMarketplace.connect(signers[2]).executeOrder(
                     0,
                     ethers.constants.AddressZero
                 );

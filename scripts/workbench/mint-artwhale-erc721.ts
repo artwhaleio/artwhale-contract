@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import { ethers } from "hardhat";
-import { tryVerify } from "../helpers/tryVerify";
-import { ArtWhaleERC721 } from "../typechain-types/contracts/token/ArtWhaleERC721";
+import { tryVerify } from "../../helpers/tryVerify";
+import { ArtWhaleERC721 } from "../../typechain-types/contracts/token/ArtWhaleERC721";
 
 // {
 //   name: 'erc721TestSignature',

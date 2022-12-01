@@ -1,24 +1,33 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
+import { Contract } from "ethers";
 import { tryVerify } from "../../helpers/tryVerify";
 import { ArtWhaleERC721 } from "../../typechain-types/contracts/token/ArtWhaleERC721";
 
-const ERC721_TOKEN_NAME = process.env.ERC721_TOKEN_NAME || "";
-const ERC721_TOKEN_SYMBOL = process.env.ERC721_TOKEN_SYMBOL || "";
+const ARTWHALE_ERC721_NAME = process.env.ARTWHALE_ERC721_NAME || "";
+const ARTWHALE_ERC721_SYMBOL = process.env.ARTWHALE_ERC721_SYMBOL || "";
 const OPERATOR_ADDRESS = process.env.OPERATOR_ADDRESS || "";
+const ARTWHALE_ERC721_PROXY_UPGRADABLE_ADDRESS = process.env.ARTWHALE_ERC721_PROXY_UPGRADABLE_ADDRESS || "";
 
 async function main() {
 
   const ArtWhaleERC721Factory = await ethers.getContractFactory("ArtWhaleERC721");
 
-  const ArtWhaleERC721 = await ArtWhaleERC721Factory.deploy(
-    ERC721_TOKEN_NAME,
-    ERC721_TOKEN_SYMBOL,
-    OPERATOR_ADDRESS
-  ) as ArtWhaleERC721;
+  let token: Contract;
 
-  await tryVerify(ArtWhaleERC721.address);
+  if (ARTWHALE_ERC721_PROXY_UPGRADABLE_ADDRESS == "0x0000000000000000000000000000000000000000") {
+    token = await upgrades.deployProxy(ArtWhaleERC721Factory, [
+      ARTWHALE_ERC721_NAME,
+      ARTWHALE_ERC721_SYMBOL,
+      OPERATOR_ADDRESS,
+      []
+    ]) as ArtWhaleERC721;
+    await token.deployed();
+    console.log("ArtWhaleERC721 deployed to:", token.address);
+  } else {
+    token = await upgrades.upgradeProxy(ARTWHALE_ERC721_PROXY_UPGRADABLE_ADDRESS, ArtWhaleERC721Factory);
+    console.log("ArtWhaleERC721 upgraded", ARTWHALE_ERC721_PROXY_UPGRADABLE_ADDRESS); 
+  }
 
-  console.log("ArtWhaleERC721 deployed: ", ArtWhaleERC721.address);
 }
 
 main()

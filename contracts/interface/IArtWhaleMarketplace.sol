@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.13;
 
-interface IArtWhaleMarket {
+interface IArtWhaleMarketplace {
     enum OrderStatus {
         NULL,
         OPEN,
