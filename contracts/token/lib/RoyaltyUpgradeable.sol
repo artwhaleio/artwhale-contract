@@ -1,16 +1,27 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.10;
 
-// solhint-disable no-empty-blocks
+// solhint-disable no-empty-blocks, func-name-mixedcase
 
 // inheritance
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../../interface/IRoyalty.sol";
 
-abstract contract Royalty is Ownable, IRoyalty {
+abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
 
     RoyaltyInfo[] private _defaultRoyaltyInfo;
     mapping(uint256 => RoyaltyInfo[]) private _tokenRoyaltyInfo;
+
+    //
+    // proxy constructors
+    //
+
+    function __Royalty_init() internal onlyInitializing {
+        __Ownable_init_unchained();
+    }
+
+    function __Royalty_init_unchained() internal onlyInitializing {
+    }
 
     //
     // public methods
@@ -109,11 +120,13 @@ abstract contract Royalty is Ownable, IRoyalty {
     function _checkRoyalty(RoyaltyInfo[] memory royalty) internal pure virtual {
         uint256 totalSum;
         for (uint256 i = 0; i < royalty.length; i++) {
-            require(royalty[i].receiver != address(0), "Royalty: wrong receiver");
-            require(royalty[i].royaltyFraction < _feeDenominator(), "Royalty: wrong royalty fraction");
+            require(royalty[i].receiver != address(0), "RoyaltyUpgradeable: wrong receiver");
+            require(royalty[i].royaltyFraction < _feeDenominator(), "RoyaltyUpgradeable: wrong royalty fraction");
             totalSum += royalty[i].royaltyFraction;
         }
-        require(totalSum < _feeDenominator(), "Royalty: wrong royalty sum");
+        require(totalSum < _feeDenominator(), "RoyaltyUpgradeable: wrong royalty sum");
     }
+
+    uint256[48] private __gap;
 
 }

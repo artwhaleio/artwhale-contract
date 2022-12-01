@@ -1,22 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.10;
 
-// solhint-disable no-empty-blocks
+// solhint-disable no-empty-blocks, func-name-mixedcase
 
 // inheritance
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
-import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./lib/TokenOperator.sol";
-import "./lib/Royalty.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./lib/TokenOperatorUpgradeable.sol";
+import "./lib/RoyaltyUpgradeable.sol";
 
 // libs
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 
-contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperator, Royalty {
+contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712Upgradeable, OwnableUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
 
-    using Address for address payable;
+    using AddressUpgradeable for address payable;
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 public constant MINT_TYPEHASH =
@@ -38,19 +39,56 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
         bytes signature
     );
 
-    constructor(
+    //
+    // proxy constructor
+    //
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
+    function initialize(
         string memory name_,
         string memory symbol_,
         string memory uri_,
         address operator_,
         RoyaltyInfo[] memory defaultRoyaltyInfo_
-    ) ERC1155("") EIP712(name_, "1") {
+    ) external initializer {
+        __ArtWhaleERC1155_init(name_, symbol_, uri_, operator_, defaultRoyaltyInfo_);
+    }
+
+    function __ArtWhaleERC1155_init(
+        string memory name_,
+        string memory symbol_,
+        string memory uri_,
+        address operator_,
+        RoyaltyInfo[] memory defaultRoyaltyInfo_
+    ) internal onlyInitializing {
+        __ERC1155_init_unchained(uri_);
+        __ERC1155Supply_init_unchained();
+        __EIP712_init_unchained(name_, "1");
+        __Ownable_init_unchained();
+        __TokenOperator_init_unchained();
+        __Royalty_init_unchained();
+
+        __ArtWhaleERC1155_init_unchained(name_, symbol_, uri_, operator_, defaultRoyaltyInfo_);
+    }
+
+    function __ArtWhaleERC1155_init_unchained(
+        string memory name_,
+        string memory symbol_,
+        string memory,
+        address operator_,
+        RoyaltyInfo[] memory defaultRoyaltyInfo_
+    ) internal onlyInitializing {
         name = name_;
         symbol = symbol_;
-        _setURI(uri_);
         _setOperator(operator_);
         _setDefaultRoyalty(defaultRoyaltyInfo_);
     }
+
+    //
+    // external methods
+    //
 
     function setURI(string memory newuri) public virtual onlyOperator {
         _setURI(newuri);
@@ -75,7 +113,7 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
 
         bytes32 digest = _hashTypedDataV4(structHash);
 
-        require(SignatureChecker.isValidSignatureNow(operator(), digest, signature_), "ArtWhaleERC1155: invalid signature");
+        require(SignatureCheckerUpgradeable.isValidSignatureNow(operator(), digest, signature_), "ArtWhaleERC1155: invalid signature");
 
         _mint(target_, tokenId_, tokenAmount_, "0x");
 
@@ -93,7 +131,7 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
     function supportsInterface(bytes4 interfaceId_)
         public
         view
-        override(ERC1155)
+        override(ERC1155Upgradeable)
         returns (bool)
     {
         return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
@@ -110,7 +148,7 @@ contract ArtWhaleERC1155 is ERC1155, ERC1155Supply, EIP712, Ownable, TokenOperat
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal virtual override(ERC1155, ERC1155Supply) {
+    ) internal virtual override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) {
         super._beforeTokenTransfer(operator_, from, to, ids, amounts, data);
 
         if (from == address(0)) {

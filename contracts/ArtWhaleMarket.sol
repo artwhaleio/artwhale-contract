@@ -388,4 +388,10 @@ contract ArtWhaleMarket is IArtWhaleMarket, Initializable, OwnableUpgradeable, R
         return (values, cursor + length);
     }
 
+    // metadata
+
+    function name() external pure returns(string memory) {
+        return "ArtWhale Marketplace";
+    }
+
 }

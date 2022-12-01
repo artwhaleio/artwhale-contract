@@ -127,4 +127,8 @@ interface IArtWhaleMarket {
 
     function withdrawERC20(address erc20, uint256 amount) external returns(bool success);
 
+    // metadata
+
+    function name() external pure returns(string memory);
+
 }

@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { ethers } from 'hardhat'
+import { ethers, upgrades } from 'hardhat'
 import { ArtWhaleERC1155 } from "../typechain-types/contracts/token/ArtWhaleERC1155";
 
 
@@ -13,8 +13,11 @@ describe("ArtWhaleERC1155", () => {
     beforeEach(async () => {
         signers = await ethers.getSigners();
 
-        const ArtWhaleERC1155 = await ethers.getContractFactory("ArtWhaleERC1155");
-        erc1155SignatureMint = await ArtWhaleERC1155.deploy("erc1155Test", "ERC1155TEST", "/",signers[0].address) as ArtWhaleERC1155;
+        const ArtWhaleERC1155Factory = await ethers.getContractFactory("ArtWhaleERC1155");
+        
+        erc1155SignatureMint = await upgrades.deployProxy(ArtWhaleERC1155Factory, [
+            "erc1155Test", "ERC1155TEST", "/",signers[0].address,[]
+        ]) as ArtWhaleERC1155;
         await erc1155SignatureMint.deployed();
 
     });

@@ -1,19 +1,34 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.10;
 
-// solhint-disable no-empty-blocks
+// solhint-disable no-empty-blocks, func-name-mixedcase
 
 // inheritance
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../../interface/ITokenOperator.sol";
 
-abstract contract TokenOperator is Ownable, ITokenOperator {
+abstract contract TokenOperatorUpgradeable is OwnableUpgradeable, ITokenOperator {
     address private _operator;
 
     modifier onlyOperator() {
-        require(operator() == _msgSender(), "TokenOperator: caller is not the operator");
+        require(operator() == _msgSender(), "TokenOperatorUpgradeable: caller is not the operator");
         _;
     }
+
+    //
+    // proxy constructors
+    //
+
+    function __TokenOperator_init() internal onlyInitializing {
+        __Ownable_init_unchained();
+    }
+
+    function __TokenOperator_init_unchained() internal onlyInitializing {
+    }
+
+    //
+    // public methods
+    //
 
     function setOperator(address newOperator_) public virtual override onlyOwner {
         _setOperator(newOperator_);
@@ -36,4 +51,6 @@ abstract contract TokenOperator is Ownable, ITokenOperator {
 
         _operator = newOperator_;
     }
+
+    uint256[48] private __gap;
 }
