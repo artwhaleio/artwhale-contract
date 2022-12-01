@@ -1,6 +1,6 @@
 # artblock-marketplace-contracts
 
-- Language: Solidity v0.8.10
+- Language: Solidity v0.8.13
 
 - Project framework: hardhat (ethers) + typechain
 

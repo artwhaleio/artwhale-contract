@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
+pragma solidity 0.8.13;
 
 // solhint-disable no-empty-blocks, func-name-mixedcase
 
@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 import "./lib/TokenOperatorUpgradeable.sol";
 import "./lib/RoyaltyUpgradeable.sol";
 
@@ -16,7 +17,7 @@ import "./lib/RoyaltyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 
-contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, EIP712Upgradeable, OwnableUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
+contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, EIP712Upgradeable, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
 
     using AddressUpgradeable for address payable;
 
@@ -63,6 +64,7 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         __ERC721URIStorage_init_unchained();
         __EIP712_init_unchained(name_, "1");
         __Ownable_init_unchained();
+        __DefaultOperatorFilterer_init();
         __TokenOperator_init_unchained();
         __Royalty_init_unchained();
 
@@ -138,6 +140,34 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         returns (bool)
     {
         return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
+    }
+
+    //
+    // overridden methods for creator fees (https://support.opensea.io/hc/en-us/articles/1500009575482)
+    //
+
+    function setApprovalForAll(address operator_, bool approved_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperatorApproval(operator_) {
+        super.setApprovalForAll(operator_, approved_);
+    }
+
+    function approve(address operator_, uint256 tokenId_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperatorApproval(operator_) {
+        super.approve(operator_, tokenId_);
+    }
+
+    function transferFrom(address from_, address to_, uint256 tokenId_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from_) {
+        super.transferFrom(from_, to_, tokenId_);
+    }
+
+    function safeTransferFrom(address from_, address to_, uint256 tokenId_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from_) {
+        super.safeTransferFrom(from_, to_, tokenId_);
+    }
+
+    function safeTransferFrom(address from_, address to_, uint256 tokenId_, bytes memory data_)
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperator(from_)
+    {
+        super.safeTransferFrom(from_, to_, tokenId_, data_);
     }
 
     //

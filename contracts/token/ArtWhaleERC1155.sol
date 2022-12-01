@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.10;
+pragma solidity 0.8.13;
 
 // solhint-disable no-empty-blocks, func-name-mixedcase
 
@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "operator-filter-registry/src/upgradeable/DefaultOperatorFiltererUpgradeable.sol";
 import "./lib/TokenOperatorUpgradeable.sol";
 import "./lib/RoyaltyUpgradeable.sol";
 
@@ -15,7 +16,7 @@ import "./lib/RoyaltyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 
-contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712Upgradeable, OwnableUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
+contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712Upgradeable, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
 
     using AddressUpgradeable for address payable;
 
@@ -67,6 +68,7 @@ contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712
         __ERC1155Supply_init_unchained();
         __EIP712_init_unchained(name_, "1");
         __Ownable_init_unchained();
+        __DefaultOperatorFilterer_init();
         __TokenOperator_init_unchained();
         __Royalty_init_unchained();
 
@@ -135,6 +137,32 @@ contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712
         returns (bool)
     {
         return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
+    }
+
+    //
+    // overridden methods for creator fees (https://support.opensea.io/hc/en-us/articles/1500009575482)
+    //
+
+    function setApprovalForAll(address operator_, bool approved_) public override onlyAllowedOperatorApproval(operator_) {
+        super.setApprovalForAll(operator_, approved_);
+    }
+
+    function safeTransferFrom(address from_, address to_, uint256 tokenId_, uint256 amount_, bytes memory data_)
+        public
+        override
+        onlyAllowedOperator(from_)
+    {
+        super.safeTransferFrom(from_, to_, tokenId_, amount_, data_);
+    }
+
+    function safeBatchTransferFrom(
+        address from_,
+        address to_,
+        uint256[] memory ids_,
+        uint256[] memory amounts_,
+        bytes memory data_
+    ) public virtual override onlyAllowedOperator(from_) {
+        super.safeBatchTransferFrom(from_, to_, ids_, amounts_, data_);
     }
 
     //
