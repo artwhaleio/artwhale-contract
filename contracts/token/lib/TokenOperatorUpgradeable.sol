@@ -7,11 +7,17 @@ pragma solidity 0.8.13;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../../interface/ITokenOperator.sol";
 
-abstract contract TokenOperatorUpgradeable is OwnableUpgradeable, ITokenOperator {
+abstract contract TokenOperatorUpgradeable is
+    OwnableUpgradeable,
+    ITokenOperator
+{
     address private _operator;
 
     modifier onlyOperator() {
-        require(operator() == _msgSender(), "TokenOperatorUpgradeable: caller is not the operator");
+        require(
+            operator() == _msgSender(),
+            "TokenOperatorUpgradeable: caller is not the operator"
+        );
         _;
     }
 
@@ -23,18 +29,19 @@ abstract contract TokenOperatorUpgradeable is OwnableUpgradeable, ITokenOperator
         __Ownable_init_unchained();
     }
 
-    function __TokenOperator_init_unchained() internal onlyInitializing {
-    }
+    function __TokenOperator_init_unchained() internal onlyInitializing {}
 
     //
     // public methods
     //
 
-    function setOperator(address newOperator_) public virtual override onlyOwner {
+    function setOperator(
+        address newOperator_
+    ) public virtual override onlyOwner {
         _setOperator(newOperator_);
     }
 
-    function operator() public view virtual override returns(address) {
+    function operator() public view virtual override returns (address) {
         return _operator;
     }
 

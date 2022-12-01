@@ -16,13 +16,22 @@ import "./lib/RoyaltyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 
-contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712Upgradeable, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
-
+contract ArtWhaleERC1155 is
+    ERC1155Upgradeable,
+    ERC1155SupplyUpgradeable,
+    EIP712Upgradeable,
+    OwnableUpgradeable,
+    DefaultOperatorFiltererUpgradeable,
+    TokenOperatorUpgradeable,
+    RoyaltyUpgradeable
+{
     using AddressUpgradeable for address payable;
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 public constant MINT_TYPEHASH =
-        keccak256("Mint(address target,uint256 tokenId,uint256 tokenAmount,uint256 mintPrice,uint256 nonce,uint256 deadline)");
+        keccak256(
+            "Mint(address target,uint256 tokenId,uint256 tokenAmount,uint256 mintPrice,uint256 nonce,uint256 deadline)"
+        );
 
     string public name;
     string public symbol;
@@ -54,7 +63,13 @@ contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712
         address operator_,
         RoyaltyInfo[] memory defaultRoyaltyInfo_
     ) external initializer {
-        __ArtWhaleERC1155_init(name_, symbol_, uri_, operator_, defaultRoyaltyInfo_);
+        __ArtWhaleERC1155_init(
+            name_,
+            symbol_,
+            uri_,
+            operator_,
+            defaultRoyaltyInfo_
+        );
     }
 
     function __ArtWhaleERC1155_init(
@@ -72,7 +87,13 @@ contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712
         __TokenOperator_init_unchained();
         __Royalty_init_unchained();
 
-        __ArtWhaleERC1155_init_unchained(name_, symbol_, uri_, operator_, defaultRoyaltyInfo_);
+        __ArtWhaleERC1155_init_unchained(
+            name_,
+            symbol_,
+            uri_,
+            operator_,
+            defaultRoyaltyInfo_
+        );
     }
 
     function __ArtWhaleERC1155_init_unchained(
@@ -106,16 +127,36 @@ contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712
         bytes memory signature_
     ) public payable virtual {
         require(!nonces[nonce_], "ArtWhaleERC1155: nonce already used");
-        require(block.timestamp <= deadline_, "ArtWhaleERC1155: expired deadline");
+        require(
+            block.timestamp <= deadline_,
+            "ArtWhaleERC1155: expired deadline"
+        );
         require(msg.value == mintPrice_, "ArtWhaleERC1155: wrong mint price");
 
         payable(operator()).sendValue(msg.value);
 
-        bytes32 structHash = keccak256(abi.encode(MINT_TYPEHASH, target_, tokenId_, tokenAmount_, mintPrice_, nonce_, deadline_));
+        bytes32 structHash = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                target_,
+                tokenId_,
+                tokenAmount_,
+                mintPrice_,
+                nonce_,
+                deadline_
+            )
+        );
 
         bytes32 digest = _hashTypedDataV4(structHash);
 
-        require(SignatureCheckerUpgradeable.isValidSignatureNow(operator(), digest, signature_), "ArtWhaleERC1155: invalid signature");
+        require(
+            SignatureCheckerUpgradeable.isValidSignatureNow(
+                operator(),
+                digest,
+                signature_
+            ),
+            "ArtWhaleERC1155: invalid signature"
+        );
 
         _mint(target_, tokenId_, tokenAmount_, "0x");
 
@@ -130,28 +171,32 @@ contract ArtWhaleERC1155 is ERC1155Upgradeable, ERC1155SupplyUpgradeable, EIP712
         });
     }
 
-    function supportsInterface(bytes4 interfaceId_)
-        public
-        view
-        override(ERC1155Upgradeable)
-        returns (bool)
-    {
-        return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
+    function supportsInterface(
+        bytes4 interfaceId_
+    ) public view override(ERC1155Upgradeable) returns (bool) {
+        return
+            interfaceId_ == type(IRoyalty).interfaceId ||
+            super.supportsInterface(interfaceId_);
     }
 
     //
     // overridden methods for creator fees (https://support.opensea.io/hc/en-us/articles/1500009575482)
     //
 
-    function setApprovalForAll(address operator_, bool approved_) public override onlyAllowedOperatorApproval(operator_) {
+    function setApprovalForAll(
+        address operator_,
+        bool approved_
+    ) public override onlyAllowedOperatorApproval(operator_) {
         super.setApprovalForAll(operator_, approved_);
     }
 
-    function safeTransferFrom(address from_, address to_, uint256 tokenId_, uint256 amount_, bytes memory data_)
-        public
-        override
-        onlyAllowedOperator(from_)
-    {
+    function safeTransferFrom(
+        address from_,
+        address to_,
+        uint256 tokenId_,
+        uint256 amount_,
+        bytes memory data_
+    ) public override onlyAllowedOperator(from_) {
         super.safeTransferFrom(from_, to_, tokenId_, amount_, data_);
     }
 

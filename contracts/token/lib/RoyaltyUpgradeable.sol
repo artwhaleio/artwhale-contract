@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../../interface/IRoyalty.sol";
 
 abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
-
     RoyaltyInfo[] private _defaultRoyaltyInfo;
     mapping(uint256 => RoyaltyInfo[]) private _tokenRoyaltyInfo;
 
@@ -20,14 +19,15 @@ abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
         __Ownable_init_unchained();
     }
 
-    function __Royalty_init_unchained() internal onlyInitializing {
-    }
+    function __Royalty_init_unchained() internal onlyInitializing {}
 
     //
     // public methods
     //
 
-    function setDefaultRoyalty(RoyaltyInfo[] memory defaultRoyaltyInfo_) public virtual override onlyOwner {
+    function setDefaultRoyalty(
+        RoyaltyInfo[] memory defaultRoyaltyInfo_
+    ) public virtual override onlyOwner {
         _setDefaultRoyalty(defaultRoyaltyInfo_);
     }
 
@@ -38,7 +38,16 @@ abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
         _setTokenRoyalty(tokenId_, royalty_);
     }
 
-    function calculateRoyalty(uint256 tokenId_, uint256 salePrice_) public view virtual override returns (address[] memory, uint256[] memory, uint256) {
+    function calculateRoyalty(
+        uint256 tokenId_,
+        uint256 salePrice_
+    )
+        public
+        view
+        virtual
+        override
+        returns (address[] memory, uint256[] memory, uint256)
+    {
         // token royalty or default royalty
         RoyaltyInfo[] memory royalty = _tokenRoyaltyInfo[tokenId_];
         if (royalty.length == 0) {
@@ -51,18 +60,28 @@ abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
         uint256 totalSum;
         for (uint256 i = 0; i < royalty.length; i++) {
             targets[i] = royalty[i].receiver;
-            amounts[i] = (salePrice_ * royalty[i].royaltyFraction) / _feeDenominator();
+            amounts[i] =
+                (salePrice_ * royalty[i].royaltyFraction) /
+                _feeDenominator();
             totalSum += amounts[i];
         }
 
         return (targets, amounts, totalSum);
     }
 
-    function defaultRoyaltyInfo() public view virtual override returns(RoyaltyInfo[] memory) {
+    function defaultRoyaltyInfo()
+        public
+        view
+        virtual
+        override
+        returns (RoyaltyInfo[] memory)
+    {
         return _defaultRoyaltyInfo;
     }
 
-    function tokenRoyaltyInfo(uint256 tokenId_) public view virtual override returns(RoyaltyInfo[] memory) {
+    function tokenRoyaltyInfo(
+        uint256 tokenId_
+    ) public view virtual override returns (RoyaltyInfo[] memory) {
         return _tokenRoyaltyInfo[tokenId_];
     }
 
@@ -70,7 +89,9 @@ abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
     // internal methods
     //
 
-    function _setDefaultRoyalty(RoyaltyInfo[] memory defaultRoyaltyInfo_) internal virtual {
+    function _setDefaultRoyalty(
+        RoyaltyInfo[] memory defaultRoyaltyInfo_
+    ) internal virtual {
         _checkRoyalty(defaultRoyaltyInfo_);
 
         _resetDefaultRoyalty();
@@ -83,7 +104,6 @@ abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
             sender: msg.sender,
             defaultRoyaltyInfo: defaultRoyaltyInfo_
         });
-
     }
 
     function _resetDefaultRoyalty() internal virtual {
@@ -120,13 +140,21 @@ abstract contract RoyaltyUpgradeable is OwnableUpgradeable, IRoyalty {
     function _checkRoyalty(RoyaltyInfo[] memory royalty) internal pure virtual {
         uint256 totalSum;
         for (uint256 i = 0; i < royalty.length; i++) {
-            require(royalty[i].receiver != address(0), "RoyaltyUpgradeable: wrong receiver");
-            require(royalty[i].royaltyFraction < _feeDenominator(), "RoyaltyUpgradeable: wrong royalty fraction");
+            require(
+                royalty[i].receiver != address(0),
+                "RoyaltyUpgradeable: wrong receiver"
+            );
+            require(
+                royalty[i].royaltyFraction < _feeDenominator(),
+                "RoyaltyUpgradeable: wrong royalty fraction"
+            );
             totalSum += royalty[i].royaltyFraction;
         }
-        require(totalSum < _feeDenominator(), "RoyaltyUpgradeable: wrong royalty sum");
+        require(
+            totalSum < _feeDenominator(),
+            "RoyaltyUpgradeable: wrong royalty sum"
+        );
     }
 
     uint256[48] private __gap;
-
 }

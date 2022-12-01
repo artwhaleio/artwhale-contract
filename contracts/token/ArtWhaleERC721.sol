@@ -17,13 +17,24 @@ import "./lib/RoyaltyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 
-contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, EIP712Upgradeable, OwnableUpgradeable, DefaultOperatorFiltererUpgradeable, TokenOperatorUpgradeable, RoyaltyUpgradeable {
-
+contract ArtWhaleERC721 is
+    Initializable,
+    ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
+    ERC721URIStorageUpgradeable,
+    EIP712Upgradeable,
+    OwnableUpgradeable,
+    DefaultOperatorFiltererUpgradeable,
+    TokenOperatorUpgradeable,
+    RoyaltyUpgradeable
+{
     using AddressUpgradeable for address payable;
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 public constant MINT_TYPEHASH =
-        keccak256("Mint(address target,uint256 tokenId,string uri,uint256 mintPrice,uint256 nonce,uint256 deadline)");
+        keccak256(
+            "Mint(address target,uint256 tokenId,string uri,uint256 mintPrice,uint256 nonce,uint256 deadline)"
+        );
 
     mapping(uint256 => bool) public nonces;
 
@@ -68,7 +79,12 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         __TokenOperator_init_unchained();
         __Royalty_init_unchained();
 
-        __ArtWhaleERC721_init_unchained(name_, symbol_, operator_, defaultRoyaltyInfo_);
+        __ArtWhaleERC721_init_unchained(
+            name_,
+            symbol_,
+            operator_,
+            defaultRoyaltyInfo_
+        );
     }
 
     function __ArtWhaleERC721_init_unchained(
@@ -85,7 +101,10 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
     // external methods
     //
 
-    function setURI(uint256 tokenId_, string memory uri_) external virtual onlyOperator {
+    function setURI(
+        uint256 tokenId_,
+        string memory uri_
+    ) external virtual onlyOperator {
         _setTokenURI(tokenId_, uri_);
     }
 
@@ -99,16 +118,36 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         bytes memory signature_
     ) external payable virtual {
         require(!nonces[nonce_], "ArtWhaleERC721: nonce already used");
-        require(block.timestamp <= deadline_, "ArtWhaleERC721: expired deadline");
+        require(
+            block.timestamp <= deadline_,
+            "ArtWhaleERC721: expired deadline"
+        );
         require(msg.value == mintPrice_, "ArtWhaleERC721: wrong mint price");
 
         payable(operator()).sendValue(msg.value);
 
-        bytes32 structHash = keccak256(abi.encode(MINT_TYPEHASH, target_, tokenId_, keccak256(bytes(uri_)), mintPrice_, nonce_, deadline_));
+        bytes32 structHash = keccak256(
+            abi.encode(
+                MINT_TYPEHASH,
+                target_,
+                tokenId_,
+                keccak256(bytes(uri_)),
+                mintPrice_,
+                nonce_,
+                deadline_
+            )
+        );
 
         bytes32 digest = _hashTypedDataV4(structHash);
 
-        require(SignatureCheckerUpgradeable.isValidSignatureNow(operator(), digest, signature_), "ArtWhaleERC721: invalid signature");
+        require(
+            SignatureCheckerUpgradeable.isValidSignatureNow(
+                operator(),
+                digest,
+                signature_
+            ),
+            "ArtWhaleERC721: invalid signature"
+        );
 
         _mint(target_, tokenId_);
         _setTokenURI(tokenId_, uri_);
@@ -124,7 +163,9 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         });
     }
 
-    function tokenURI(uint256 tokenId_)
+    function tokenURI(
+        uint256 tokenId_
+    )
         public
         view
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
@@ -133,36 +174,75 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         return super.tokenURI(tokenId_);
     }
 
-    function supportsInterface(bytes4 interfaceId_)
+    function supportsInterface(
+        bytes4 interfaceId_
+    )
         public
         view
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (bool)
     {
-        return interfaceId_ == type(IRoyalty).interfaceId || super.supportsInterface(interfaceId_);
+        return
+            interfaceId_ == type(IRoyalty).interfaceId ||
+            super.supportsInterface(interfaceId_);
     }
 
     //
     // overridden methods for creator fees (https://support.opensea.io/hc/en-us/articles/1500009575482)
     //
 
-    function setApprovalForAll(address operator_, bool approved_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperatorApproval(operator_) {
+    function setApprovalForAll(
+        address operator_,
+        bool approved_
+    )
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperatorApproval(operator_)
+    {
         super.setApprovalForAll(operator_, approved_);
     }
 
-    function approve(address operator_, uint256 tokenId_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperatorApproval(operator_) {
+    function approve(
+        address operator_,
+        uint256 tokenId_
+    )
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperatorApproval(operator_)
+    {
         super.approve(operator_, tokenId_);
     }
 
-    function transferFrom(address from_, address to_, uint256 tokenId_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from_) {
+    function transferFrom(
+        address from_,
+        address to_,
+        uint256 tokenId_
+    )
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperator(from_)
+    {
         super.transferFrom(from_, to_, tokenId_);
     }
 
-    function safeTransferFrom(address from_, address to_, uint256 tokenId_) public override(ERC721Upgradeable, IERC721Upgradeable) onlyAllowedOperator(from_) {
+    function safeTransferFrom(
+        address from_,
+        address to_,
+        uint256 tokenId_
+    )
+        public
+        override(ERC721Upgradeable, IERC721Upgradeable)
+        onlyAllowedOperator(from_)
+    {
         super.safeTransferFrom(from_, to_, tokenId_);
     }
 
-    function safeTransferFrom(address from_, address to_, uint256 tokenId_, bytes memory data_)
+    function safeTransferFrom(
+        address from_,
+        address to_,
+        uint256 tokenId_,
+        bytes memory data_
+    )
         public
         override(ERC721Upgradeable, IERC721Upgradeable)
         onlyAllowedOperator(from_)
@@ -174,10 +254,11 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
     // internal methods
     //
 
-    function _beforeTokenTransfer(address from_, address to_, uint256 tokenId_)
-        internal
-        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
-    {
+    function _beforeTokenTransfer(
+        address from_,
+        address to_,
+        uint256 tokenId_
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from_, to_, tokenId_);
     }
 
@@ -186,11 +267,17 @@ contract ArtWhaleERC721 is Initializable, ERC721Upgradeable, ERC721EnumerableUpg
         address to,
         uint256 first,
         uint96 size
-    ) internal virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+    )
+        internal
+        virtual
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
         super._beforeConsecutiveTokenTransfer(from, to, first, size);
     }
 
-    function _burn(uint256 tokenId_) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
+    function _burn(
+        uint256 tokenId_
+    ) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
         super._burn(tokenId_);
         _resetTokenRoyalty(tokenId_);
     }
