@@ -11,8 +11,8 @@ async function main() {
   const artWhaleMarketplace = await ArtWhaleMarketplaceFactory.attach(MARKETPLACE_PROXY_UPGRADABLE_ADDRESS) as ArtWhaleMarketplace;
 
   await artWhaleMarketplace.setTradeFeePercent(0);
-  await artWhaleMarketplace.addToWhitelistErc721("");
-  await artWhaleMarketplace.addToWhitelistErc1155("");
+  await artWhaleMarketplace.addToWhitelistErc721("0xF412D1eFDDB3781502711c74a950DC89d76fc9dE");
+  await artWhaleMarketplace.addToWhitelistErc1155("0xD4e4Ad77fF9733Cc5D612D3Df3A0868616d30C7c");
 
   console.log("job done!");
 }
