@@ -99,13 +99,19 @@ contract ArtWhaleMarketplace is
                 _whitelistErc721.contains(tokenContract),
                 "ArtWhaleMarketplace: nft not registered"
             );
-            require(tokenAmount == 1, "ArtWhaleMarketplace: wrong token amount");
+            require(
+                tokenAmount == 1,
+                "ArtWhaleMarketplace: wrong token amount"
+            );
         } else if (nftStandart == NFTStandart.ERC1155) {
             require(
                 _whitelistErc1155.contains(tokenContract),
                 "ArtWhaleMarketplace: nft not registered"
             );
-            require(tokenAmount >= 1, "ArtWhaleMarketplace: wrong token amount");
+            require(
+                tokenAmount >= 1,
+                "ArtWhaleMarketplace: wrong token amount"
+            );
         }
         require(
             settlementToken != address(0),
@@ -233,13 +239,22 @@ contract ArtWhaleMarketplace is
             order.status == OrderStatus.OPEN,
             "ArtWhaleMarketplace: only for open orders"
         );
-        require(order.seller != msg.sender, "ArtWhaleMarketplace: not for seller");
+        require(
+            order.seller != msg.sender,
+            "ArtWhaleMarketplace: not for seller"
+        );
 
         if (_orderType[orderId] == OrderType.P2P) {
-            require(buyer == address(0), "ArtWhaleMarketplace: need zero buyer");
+            require(
+                buyer == address(0),
+                "ArtWhaleMarketplace: need zero buyer"
+            );
             order.buyer = msg.sender;
         } else {
-            require(msg.sender == owner(), "ArtWhaleMarketplace: only for owner");
+            require(
+                msg.sender == owner(),
+                "ArtWhaleMarketplace: only for owner"
+            );
             order.buyer = buyer;
         }
         order.buyer = msg.sender;

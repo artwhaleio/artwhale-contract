@@ -265,7 +265,11 @@ contract ArtWhaleERC721 is
         address from_,
         address to_,
         uint256 tokenId_
-    ) internal virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+    )
+        internal
+        virtual
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
         super._beforeTokenTransfer(from_, to_, tokenId_);
     }
 
@@ -284,7 +288,11 @@ contract ArtWhaleERC721 is
 
     function _burn(
         uint256 tokenId_
-    ) internal virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
+    )
+        internal
+        virtual
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+    {
         super._burn(tokenId_);
         _resetTokenRoyalty(tokenId_);
     }
