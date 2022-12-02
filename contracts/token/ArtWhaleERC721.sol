@@ -168,6 +168,7 @@ contract ArtWhaleERC721 is
     )
         public
         view
+        virtual
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
@@ -179,6 +180,7 @@ contract ArtWhaleERC721 is
     )
         public
         view
+        virtual
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (bool)
     {
@@ -196,6 +198,7 @@ contract ArtWhaleERC721 is
         bool approved_
     )
         public
+        virtual
         override(ERC721Upgradeable, IERC721Upgradeable)
         onlyAllowedOperatorApproval(operator_)
     {
@@ -207,6 +210,7 @@ contract ArtWhaleERC721 is
         uint256 tokenId_
     )
         public
+        virtual
         override(ERC721Upgradeable, IERC721Upgradeable)
         onlyAllowedOperatorApproval(operator_)
     {
@@ -219,6 +223,7 @@ contract ArtWhaleERC721 is
         uint256 tokenId_
     )
         public
+        virtual
         override(ERC721Upgradeable, IERC721Upgradeable)
         onlyAllowedOperator(from_)
     {
@@ -231,6 +236,7 @@ contract ArtWhaleERC721 is
         uint256 tokenId_
     )
         public
+        virtual
         override(ERC721Upgradeable, IERC721Upgradeable)
         onlyAllowedOperator(from_)
     {
@@ -244,6 +250,7 @@ contract ArtWhaleERC721 is
         bytes memory data_
     )
         public
+        virtual
         override(ERC721Upgradeable, IERC721Upgradeable)
         onlyAllowedOperator(from_)
     {
@@ -258,7 +265,7 @@ contract ArtWhaleERC721 is
         address from_,
         address to_,
         uint256 tokenId_
-    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+    ) internal virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from_, to_, tokenId_);
     }
 
@@ -277,7 +284,7 @@ contract ArtWhaleERC721 is
 
     function _burn(
         uint256 tokenId_
-    ) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
+    ) internal virtual override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
         super._burn(tokenId_);
         _resetTokenRoyalty(tokenId_);
     }
