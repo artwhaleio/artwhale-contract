@@ -149,6 +149,7 @@ contract ArtWhaleERC721 is
             "ArtWhaleERC721: invalid signature"
         );
 
+        nonces[nonce_] = true;
         _mint(target_, tokenId_);
         _setTokenURI(tokenId_, uri_);
 

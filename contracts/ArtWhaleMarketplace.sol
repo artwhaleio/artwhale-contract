@@ -481,7 +481,7 @@ contract ArtWhaleMarketplace is
     function removeFromWhitelistErc721(
         address erc721
     ) external override nonReentrant onlyOwner returns (bool success) {
-        _whitelistErc1155.remove(erc721);
+        _whitelistErc721.remove(erc721);
         return (true);
     }
 
@@ -545,7 +545,7 @@ contract ArtWhaleMarketplace is
 
     function _setTradeFeePercent(uint256 newTradeFeePercent) internal {
         require(
-            newTradeFeePercent >= 0 && newTradeFeePercent <= 100,
+            newTradeFeePercent >= 0 && newTradeFeePercent < 100,
             "ArtWhaleMarketplace: wrong percent value"
         );
         _tradeFeePercent = newTradeFeePercent;

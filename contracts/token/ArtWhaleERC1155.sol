@@ -158,6 +158,7 @@ contract ArtWhaleERC1155 is
             "ArtWhaleERC1155: invalid signature"
         );
 
+        nonces[nonce_] = true;
         _mint(target_, tokenId_, tokenAmount_, "0x");
 
         emit Mint({
