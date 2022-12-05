@@ -3,222 +3,40 @@ import { expect } from "chai";
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { ethers, upgrades } from 'hardhat'
 import { BigNumber } from "ethers";
-import { ArtWhaleERC721 } from "../typechain-types/contracts/token/ArtWhaleERC721";
-import { ArtWhaleERC721Mock } from "../typechain-types/contracts/mocks/ArtWhaleERC721Mock";
+import { RoyaltyUpgradeableMock } from "../typechain-types/contracts/mocks/RoyaltyUpgradeableMock";
 
-describe("ArtWhaleERC721", () => {
+describe("RoyaltyUpgradeable", () => {
 
     let signers: SignerWithAddress[];
-    let artWhaleERC721: ArtWhaleERC721;
+    let royaltyUpgradeable: RoyaltyUpgradeableMock;
 
     beforeEach(async () => {
         signers = await ethers.getSigners();
 
-        const ArtWhaleERC721Factory = await ethers.getContractFactory("ArtWhaleERC721");
+        const RoyaltyUpgradeableMockFactory = await ethers.getContractFactory("RoyaltyUpgradeableMock");
         
-        artWhaleERC721 = await upgrades.deployProxy(ArtWhaleERC721Factory, [
-            "erc721Test", "ERC721TEST",signers[0].address,[]
-        ]) as ArtWhaleERC721;
-        await artWhaleERC721.deployed();
+        royaltyUpgradeable = await RoyaltyUpgradeableMockFactory.deploy() as RoyaltyUpgradeableMock;
+        await royaltyUpgradeable.deployed();
 
     });
-    describe('lazy minting', () => {
-        let domain = {}
-        let types = {}
 
-        beforeEach(() => {
-            domain = {
-                name: "erc721Test",
-                version: '1',
-                chainId: hre.ethers.provider.network.chainId,
-                verifyingContract: artWhaleERC721.address
-            }
-    
-            types = {
-                Mint : [
-                    {name: "target", type: "address"},
-                    {name: "tokenId", type: "uint256"},
-                    {name: "uri", type: "string"},
-                    {name: "mintPrice", type: "uint256"},
-                    {name: "nonce", type: "uint256"},
-                    {name: "deadline", type: "uint256"},
-                ]
-            }
-        });
-
-        it("mint on demand", async () => {
-        
-            const value = {
-                target: signers[1].address,
-                tokenId: "0",
-                uri: "/",
-                mintPrice: "0",
-                nonce: 0,
-                deadline: "2669291763",
-            }
-        
-            const signature = signers[0]._signTypedData(domain, types, value);
-    
-            await artWhaleERC721.connect(signers[1]).mint(
-                signers[1].address,
-                "0",
-                "/",
-                "0",
-                "0",
-                "2669291763",
-                signature
-            );
-    
-            expect(await artWhaleERC721.ownerOf(0)).to.be.equal(signers[1].address);
-        });
-
-        it("negative cases", async () => {
-            // re-user nonce
-            const value1 = {
-                target: signers[1].address,
-                tokenId: "0",
-                uri: "/",
-                mintPrice: "0",
-                nonce: 0,
-                deadline: "2669291763",
-            }    
-            const signature1 = signers[0]._signTypedData(domain, types, value1);
-            await artWhaleERC721.mint(
-                signers[1].address,
-                "0",
-                "/",
-                "0",
-                "0",
-                "2669291763",
-                signature1
-            );
-            const value2 = {
-                target: signers[1].address,
-                tokenId: 2,
-                uri: "/",
-                mintPrice: "0",
-                nonce: 0,
-                deadline: "2669291763",
-            }    
-            const signature2 = signers[0]._signTypedData(domain, types, value2);
-            await expect(artWhaleERC721.mint(
-                signers[1].address,
-                "2",
-                "/",
-                "0",
-                "0",
-                "2669291763",
-                signature2
-            )).to.be.revertedWith("ArtWhaleERC721: nonce already used");
-            
-            // expired deadline
-            const value3 = {
-                target: signers[1].address,
-                tokenId: 3,
-                uri: "/",
-                mintPrice: "0",
-                nonce: 0,
-                deadline: "10000",
-            }    
-            const signature3 = signers[0]._signTypedData(domain, types, value3);
-            await expect(artWhaleERC721.mint(
-                signers[1].address,
-                "3",
-                "/",
-                "0",
-                "4",
-                "10000",
-                signature3
-            )).to.be.revertedWith("ArtWhaleERC721: expired deadline");
-
-            // wrong mint price
-            const value4 = {
-                target: signers[1].address,
-                tokenId: 4,
-                uri: "/",
-                mintPrice: "10",
-                nonce: 0,
-                deadline: "2669291763",
-            }    
-            const signature4 = signers[0]._signTypedData(domain, types, value4);
-            await expect(artWhaleERC721.mint(
-                signers[1].address,
-                "4",
-                "/",
-                "10",
-                "4",
-                "2669291763",
-                signature4,
-                {value: "10001"}
-            )).to.be.revertedWith("ArtWhaleERC721: wrong mint price");
-
-            // wrong signature
-            const value5 = {
-                target: signers[1].address,
-                tokenId: 4,
-                uri: "/",
-                mintPrice: "100",
-                nonce: 0,
-                deadline: "2669291763",
-            }    
-            const signature5 = signers[0]._signTypedData(domain, types, value5);
-            await expect(artWhaleERC721.mint(
-                signers[1].address,
-                "4",
-                "/",
-                "100",
-                "4",
-                "2669291763",
-                signature5,
-                {value: "100"}
-            )).to.be.revertedWith("ArtWhaleERC721: invalid signature");
-        });
-        
-        
-    });
-
-    describe("uri", () =>  {
-        it('default value', async () => {
-            await expect(artWhaleERC721.tokenURI(0)).to.be.revertedWith('ERC721: invalid token ID');
-        });
-
-        it('set uri', async () => {
-            const ArtWhaleERC721FactoryMock = await ethers.getContractFactory("ArtWhaleERC721Mock");
-            const artWhaleERC721Mock = await ArtWhaleERC721FactoryMock.deploy(
-                "erc721Test", "ERC721TEST"
-            );
-            await artWhaleERC721Mock.deployed();
-
-            await artWhaleERC721Mock.mintTo(signers[0].address, 0, "");
-            const newURI = "12345ABC";
-            
-            // TODO improve this
-            await expect(artWhaleERC721Mock.setURI(0, newURI)).to.be.revertedWith("TokenOperatorUpgradeable: caller is not the operator");
-
-            await artWhaleERC721Mock.setOperator(signers[0].address);
-
-            await artWhaleERC721Mock.setURI(0, newURI)
-            expect(await artWhaleERC721Mock.tokenURI(0)).to.be.equal(newURI);
-        });
-    });
-
-    describe("royalty", () =>  {
+    describe("royalty value", () =>  {
         it("empty default royalty value by default", async () => {
-            expect(await artWhaleERC721.defaultRoyaltyInfo()).to.deep.equal([]);
+            expect(await royaltyUpgradeable.defaultRoyaltyInfo()).to.deep.equal([]);
         });
 
         it("empty token royalty value by default", async () => {
-            expect(await artWhaleERC721.tokenRoyaltyInfo(0)).to.deep.equal([]);
-            expect(await artWhaleERC721.tokenRoyaltyInfo(1)).to.deep.equal([]);
-            expect(await artWhaleERC721.tokenRoyaltyInfo(2)).to.deep.equal([]);
-            expect(await artWhaleERC721.tokenRoyaltyInfo(3)).to.deep.equal([]);
-            expect(await artWhaleERC721.tokenRoyaltyInfo(4)).to.deep.equal([]);
+            expect(await royaltyUpgradeable.tokenRoyaltyInfo(0)).to.deep.equal([]);
+            expect(await royaltyUpgradeable.tokenRoyaltyInfo(1)).to.deep.equal([]);
+            expect(await royaltyUpgradeable.tokenRoyaltyInfo(2)).to.deep.equal([]);
+            expect(await royaltyUpgradeable.tokenRoyaltyInfo(3)).to.deep.equal([]);
+            expect(await royaltyUpgradeable.tokenRoyaltyInfo(4)).to.deep.equal([]);
         });
 
         describe("set royalty", () =>  {
             it('for default royalty', async () => {
-                expect(await artWhaleERC721.tokenRoyaltyInfo(3)).to.deep.equal([]);
-                expect(await artWhaleERC721.defaultRoyaltyInfo()).to.have.length(0);
+                expect(await royaltyUpgradeable.tokenRoyaltyInfo(3)).to.deep.equal([]);
+                expect(await royaltyUpgradeable.defaultRoyaltyInfo()).to.have.length(0);
 
                 const defaultRoyalty = [
                     {
@@ -229,16 +47,16 @@ describe("ArtWhaleERC721", () => {
                         receiver: signers[2].address,
                         royaltyFraction: BigNumber.from('200')
                     },
-                ]
-                await artWhaleERC721.setDefaultRoyalty(defaultRoyalty);
+                ];
+                await royaltyUpgradeable.setDefaultRoyalty(defaultRoyalty);
 
                 // TODO change length to real values
-                expect(await artWhaleERC721.tokenRoyaltyInfo(3)).to.deep.equal([]);
-                expect(await artWhaleERC721.defaultRoyaltyInfo()).to.have.length(2);
+                expect(await royaltyUpgradeable.tokenRoyaltyInfo(3)).to.deep.equal([]);
+                expect(await royaltyUpgradeable.defaultRoyaltyInfo()).to.have.length(2);
             });
             it('for token royalty', async () => {
-                expect(await artWhaleERC721.tokenRoyaltyInfo(3)).to.deep.equal([]);
-                expect(await artWhaleERC721.defaultRoyaltyInfo()).to.have.length(0);
+                expect(await royaltyUpgradeable.tokenRoyaltyInfo(3)).to.deep.equal([]);
+                expect(await royaltyUpgradeable.defaultRoyaltyInfo()).to.have.length(0);
 
                 const defaultRoyalty = [
                     {
@@ -250,11 +68,27 @@ describe("ArtWhaleERC721", () => {
                         royaltyFraction: BigNumber.from('200')
                     },
                 ]
-                await artWhaleERC721.setTokenRoyalty(3, defaultRoyalty);
+                await royaltyUpgradeable.setTokenRoyalty(3, defaultRoyalty);
 
                 // TODO change length to real values
-                expect(await artWhaleERC721.tokenRoyaltyInfo(3)).to.have.length(2);
-                expect(await artWhaleERC721.defaultRoyaltyInfo()).to.have.length(0);
+                expect(await royaltyUpgradeable.tokenRoyaltyInfo(3)).to.have.length(2);
+                expect(await royaltyUpgradeable.defaultRoyaltyInfo()).to.have.length(0);
+            });
+
+            it('negative cases', async () => {
+                const royalty = [
+                    {
+                        receiver: signers[1].address,
+                        royaltyFraction: BigNumber.from('100')
+                    },
+                    {
+                        receiver: signers[2].address,
+                        royaltyFraction: BigNumber.from('200')
+                    },
+                ];
+                
+                await expect(royaltyUpgradeable.connect(signers[1]).setDefaultRoyalty(royalty)).to.be.revertedWith("Ownable: caller is not the owner");
+                await expect(royaltyUpgradeable.connect(signers[1]).setTokenRoyalty(0, royalty)).to.be.revertedWith("Ownable: caller is not the owner");
             });
         });
 
@@ -262,7 +96,7 @@ describe("ArtWhaleERC721", () => {
             it("with empty default royalty", async () => {
                 const salePrice = ethers.BigNumber.from("10000");
 
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).to.deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).to.deep.equal(
                     [[],[],ethers.BigNumber.from("0")]
                 );
             });
@@ -277,16 +111,16 @@ describe("ArtWhaleERC721", () => {
                 // 1st case
                 //
                 fraction = ethers.BigNumber.from("1000");  // 10%
-                await artWhaleERC721.setDefaultRoyalty([{
+                await royaltyUpgradeable.setDefaultRoyalty([{
                     receiver: signers[1].address,
                     royaltyFraction: fraction
                 }]);
                 salePrice = ethers.BigNumber.from("20000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("2000")],ethers.BigNumber.from("2000")]
                 );
                 salePrice = ethers.BigNumber.from("250000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("25000")],ethers.BigNumber.from("25000")]
                 );
 
@@ -294,16 +128,16 @@ describe("ArtWhaleERC721", () => {
                 // 2nd case
                 //
                 fraction = ethers.BigNumber.from("1500");  // 15%
-                await artWhaleERC721.setDefaultRoyalty([{
+                await royaltyUpgradeable.setDefaultRoyalty([{
                     receiver: signers[1].address,
                     royaltyFraction: fraction
                 }]);
                 salePrice = ethers.BigNumber.from("160000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("24000")],ethers.BigNumber.from("24000")]
                 );
                 salePrice = ethers.BigNumber.from("10000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("1500")],ethers.BigNumber.from("1500")]
                 );
             });
@@ -321,7 +155,7 @@ describe("ArtWhaleERC721", () => {
                 //
                 fraction1 = ethers.BigNumber.from("1000");  // 10%
                 fraction2 = ethers.BigNumber.from("2000");  // 20%
-                await artWhaleERC721.setDefaultRoyalty([
+                await royaltyUpgradeable.setDefaultRoyalty([
                 {
                     receiver: signers[1].address,
                     royaltyFraction: fraction1
@@ -332,7 +166,7 @@ describe("ArtWhaleERC721", () => {
                 },
                 ]);
                 salePrice = ethers.BigNumber.from("20000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address],
                         [ethers.BigNumber.from("2000"), ethers.BigNumber.from("4000")],
@@ -340,7 +174,7 @@ describe("ArtWhaleERC721", () => {
                     ]
                 );
                 salePrice = ethers.BigNumber.from("250000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address],
                         [ethers.BigNumber.from("25000"), ethers.BigNumber.from("50000")],
@@ -354,7 +188,7 @@ describe("ArtWhaleERC721", () => {
                 fraction1 = ethers.BigNumber.from("1500");  // 15%
                 fraction2 = ethers.BigNumber.from("2500");  // 25%
                 fraction3 = ethers.BigNumber.from("100");   // 1%
-                await artWhaleERC721.setDefaultRoyalty([
+                await royaltyUpgradeable.setDefaultRoyalty([
                 {
                     receiver: signers[1].address,
                     royaltyFraction: fraction1
@@ -369,7 +203,7 @@ describe("ArtWhaleERC721", () => {
                 },
                 ]);
                 salePrice = ethers.BigNumber.from("100000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address, signers[3].address],
                         [ethers.BigNumber.from("15000"), ethers.BigNumber.from("25000"), ethers.BigNumber.from("1000")],
@@ -377,7 +211,7 @@ describe("ArtWhaleERC721", () => {
                     ]
                 );
                 salePrice = ethers.BigNumber.from("250000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address, signers[3].address],
                         [ethers.BigNumber.from("37500"), ethers.BigNumber.from("62500"), ethers.BigNumber.from("2500")],
@@ -397,39 +231,39 @@ describe("ArtWhaleERC721", () => {
                 // 1st case
                 //
                 wrongFraction = ethers.BigNumber.from("2000");  // 20%
-                await artWhaleERC721.setDefaultRoyalty([{
+                await royaltyUpgradeable.setDefaultRoyalty([{
                     receiver: signers[1].address,
                     royaltyFraction: wrongFraction
                 }]);
                 fraction = ethers.BigNumber.from("1000");  // 10%
-                await artWhaleERC721.setTokenRoyalty(0, [{
+                await royaltyUpgradeable.setTokenRoyalty(0, [{
                     receiver: signers[1].address,
                     royaltyFraction: fraction
                 }]);
                 salePrice = ethers.BigNumber.from("20000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("2000")],ethers.BigNumber.from("2000")]
                 );
                 salePrice = ethers.BigNumber.from("250000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("25000")],ethers.BigNumber.from("25000")]
                 );
 
                 //
                 // 2nd case
                 //
-                await artWhaleERC721.setDefaultRoyalty([]);
+                await royaltyUpgradeable.setDefaultRoyalty([]);
                 fraction = ethers.BigNumber.from("1500");  // 15%
-                await artWhaleERC721.setTokenRoyalty(0, [{
+                await royaltyUpgradeable.setTokenRoyalty(0, [{
                     receiver: signers[1].address,
                     royaltyFraction: fraction
                 }]);
                 salePrice = ethers.BigNumber.from("160000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("24000")],ethers.BigNumber.from("24000")]
                 );
                 salePrice = ethers.BigNumber.from("10000");
-                expect(await artWhaleERC721.calculateRoyalty(0, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(0, salePrice)).deep.equal(
                     [[signers[1].address],[ethers.BigNumber.from("1500")],ethers.BigNumber.from("1500")]
                 );
             });
@@ -447,13 +281,13 @@ describe("ArtWhaleERC721", () => {
                 // 1st case
                 //
                 wrongFraction = ethers.BigNumber.from("2500");  // 25%
-                await artWhaleERC721.setDefaultRoyalty([{
+                await royaltyUpgradeable.setDefaultRoyalty([{
                     receiver: signers[1].address,
                     royaltyFraction: wrongFraction
                 }]);
                 fraction1 = ethers.BigNumber.from("1000");  // 10%
                 fraction2 = ethers.BigNumber.from("2000");  // 20%
-                await artWhaleERC721.setTokenRoyalty(1, [
+                await royaltyUpgradeable.setTokenRoyalty(1, [
                 {
                     receiver: signers[1].address,
                     royaltyFraction: fraction1
@@ -464,7 +298,7 @@ describe("ArtWhaleERC721", () => {
                 },
                 ]);
                 salePrice = ethers.BigNumber.from("20000");
-                expect(await artWhaleERC721.calculateRoyalty(1, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(1, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address],
                         [ethers.BigNumber.from("2000"), ethers.BigNumber.from("4000")],
@@ -472,7 +306,7 @@ describe("ArtWhaleERC721", () => {
                     ]
                 );
                 salePrice = ethers.BigNumber.from("250000");
-                expect(await artWhaleERC721.calculateRoyalty(1, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(1, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address],
                         [ethers.BigNumber.from("25000"), ethers.BigNumber.from("50000")],
@@ -486,7 +320,7 @@ describe("ArtWhaleERC721", () => {
                 fraction1 = ethers.BigNumber.from("1500");  // 15%
                 fraction2 = ethers.BigNumber.from("2500");  // 25%
                 fraction3 = ethers.BigNumber.from("100");   // 1%
-                await artWhaleERC721.setTokenRoyalty(2, [
+                await royaltyUpgradeable.setTokenRoyalty(2, [
                 {
                     receiver: signers[1].address,
                     royaltyFraction: fraction1
@@ -501,7 +335,7 @@ describe("ArtWhaleERC721", () => {
                 },
                 ]);
                 salePrice = ethers.BigNumber.from("100000");
-                expect(await artWhaleERC721.calculateRoyalty(2, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(2, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address, signers[3].address],
                         [ethers.BigNumber.from("15000"), ethers.BigNumber.from("25000"), ethers.BigNumber.from("1000")],
@@ -509,13 +343,53 @@ describe("ArtWhaleERC721", () => {
                     ]
                 );
                 salePrice = ethers.BigNumber.from("250000");
-                expect(await artWhaleERC721.calculateRoyalty(2, salePrice)).deep.equal(
+                expect(await royaltyUpgradeable.calculateRoyalty(2, salePrice)).deep.equal(
                     [
                         [signers[1].address, signers[2].address, signers[3].address],
                         [ethers.BigNumber.from("37500"), ethers.BigNumber.from("62500"), ethers.BigNumber.from("2500")],
                         ethers.BigNumber.from("102500")
                     ]
                 );
+            });
+
+            it('negative cases', async () => {
+                // wrong reciever
+                const royalty1 = [
+                    {
+                        receiver: ethers.constants.AddressZero,
+                        royaltyFraction: BigNumber.from('100')
+                    }
+                ];
+                await expect(royaltyUpgradeable.checkRoyalty(royalty1)).to.be.revertedWith("RoyaltyUpgradeable: wrong receiver");
+
+                // wrong fraction
+                const royalty2 = [
+                    {
+                        receiver: signers[1].address,
+                        royaltyFraction: BigNumber.from('10000')
+                    }
+                ];
+                await expect(royaltyUpgradeable.checkRoyalty(royalty2)).to.be.revertedWith("RoyaltyUpgradeable: wrong royalty fraction");
+                const royalty3 = [
+                    {
+                        receiver: signers[1].address,
+                        royaltyFraction: BigNumber.from('11000')
+                    }
+                ];
+                await expect(royaltyUpgradeable.checkRoyalty(royalty3)).to.be.revertedWith("RoyaltyUpgradeable: wrong royalty fraction");
+
+                // wrong total sum
+                const royalty4 = [
+                    {
+                        receiver: signers[1].address,
+                        royaltyFraction: BigNumber.from('5000')
+                    },
+                    {
+                        receiver: signers[2].address,
+                        royaltyFraction: BigNumber.from('5000')
+                    }
+                ];
+                await expect(royaltyUpgradeable.checkRoyalty(royalty4)).to.be.revertedWith("RoyaltyUpgradeable: wrong royalty sum");
             });
 
         });
