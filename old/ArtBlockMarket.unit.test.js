@@ -5,7 +5,7 @@ const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 
 const ArtBlockMarket = artifacts.require('ArtBlockMarket');
 const ERC20Token = artifacts.require('ERC20Token');
-const ERC721Token = artifacts.require('ERC721Token');
+const ArtWhaleERC721Mock = artifacts.require('ArtWhaleERC721Mock');
 const ERC1155Token = artifacts.require('ERC1155Token');
 
 const OrderStatus = {
@@ -54,7 +54,7 @@ contract('ArtBlockMarket', function (accounts) {
     describe('create order', function () {
         beforeEach(async function () {
             this.erc20 = await ERC20Token.new("TEST", "TEST");
-            this.erc721 = await ERC721Token.new("TEST", "TEST");
+            this.erc721 = await ArtWhaleERC721Mock.new("TEST", "TEST");
             this.erc1155 = await ERC1155Token.new("TEST", "TEST");
 
             this.marketplace = await ArtBlockMarket.new();
@@ -161,7 +161,7 @@ contract('ArtBlockMarket', function (accounts) {
     describe('execute order', function () {
         beforeEach(async function () {
             this.erc20 = await ERC20Token.new("TEST", "TEST");
-            this.erc721 = await ERC721Token.new("TEST", "TEST");
+            this.erc721 = await ArtWhaleERC721Mock.new("TEST", "TEST");
             this.erc1155 = await ERC1155Token.new("TEST", "TEST");
 
             this.marketplace = await ArtBlockMarket.new();

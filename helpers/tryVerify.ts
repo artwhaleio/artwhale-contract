@@ -1,7 +1,9 @@
-async function tryVerify(contractAddress, constructorArgs) {
+import hre from "hardhat";
+
+async function tryVerify(contractAddress: string, constructorArgs?: any) {
     console.log("\n")
+    await new Promise(r => setTimeout(r, 3000));
     try {
-      console.log(constructorArgs)
       await hre.run("verify:verify", {
         address: contractAddress,
         constructorArguments: constructorArgs,
@@ -9,9 +11,8 @@ async function tryVerify(contractAddress, constructorArgs) {
       console.log(`Verification of ${contractAddress} success\n`);
     } catch (error) {
       console.log(`Verification of ${contractAddress} failed\n`);
-      console.log(error);
       console.log("\n\n")
     }
   }
 
-module.exports = {tryVerify}
+export {tryVerify}

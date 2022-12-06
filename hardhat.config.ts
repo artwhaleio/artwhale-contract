@@ -4,6 +4,7 @@ import { HardhatUserConfig } from "hardhat/types"
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import { config as dotEnvConfig } from "dotenv";
+import "@nomicfoundation/hardhat-chai-matchers"
 import "hardhat-gas-reporter"
 import "hardhat-storage-layout";
 import "hardhat-tracer";
@@ -126,7 +127,7 @@ const config: HardhatUserConfig = {
     },
   },
   solidity: {
-    version: "0.8.10",
+    version: "0.8.13",
     settings: {
       optimizer: {
         enabled: true,
