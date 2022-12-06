@@ -9,8 +9,8 @@ import { ArtWhaleERC721Mock } from "../typechain-types/contracts/mocks/ArtWhaleE
 import { ArtWhaleERC1155Mock } from "../typechain-types/contracts/mocks/ArtWhaleERC1155Mock";
 
 const OrderType = {
-    P2P: "0",
-    AUTHORITY: "1",
+    P2P: 0,
+    AUTHORITY: 1,
 }
 
 const OrderStatus = {
@@ -90,8 +90,13 @@ describe("ArtWhaleMarketplace", () => {
                     erc20.address,
                     tokenAmount
                 );
-    
+                
                 expect(await erc20.balanceOf(artWhaleMarketplace.address)).to.equal("0");
+
+                await expect(artWhaleMarketplace.connect(signers[1]).withdrawERC20(
+                    erc20.address,
+                    tokenAmount
+                )).to.be.revertedWith("Ownable: caller is not the owner");
             });
             it('ether', async function () {
                 const tokenAmount = ethers.utils.parseEther("100");
@@ -109,7 +114,11 @@ describe("ArtWhaleMarketplace", () => {
                 );
     
                 expect(await ethers.provider.getBalance(artWhaleMarketplace.address)).to.equal("0");
-    
+
+                await expect(artWhaleMarketplace.connect(signers[1]).withdrawERC20(
+                    erc20.address,
+                    tokenAmount
+                )).to.be.revertedWith("Ownable: caller is not the owner");
             });
         });
 
@@ -297,63 +306,450 @@ describe("ArtWhaleMarketplace", () => {
             await erc1155.mintTo(signers[1].address, 1, ethers.utils.parseEther('10000'));
 
         });
+        describe('create order', () => {
+            it('erc721', async function () {
+                const orderPrice = ethers.utils.parseEther("100");
 
-        describe('erc721', () => {
-            describe('create order', () => {
-                it('erc721', async function () {
-                    const orderPrice = ethers.utils.parseEther("100");
+                await erc721.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
+    
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(0);
+                const expectedDetails = {
+                    orderId: BigNumber.from('0'),
+                    nftStandart: NFTStandart.NULL,
+                    tokenContract: ethers.constants.AddressZero,
+                    tokenId: BigNumber.from('0'),
+                    tokenAmount: BigNumber.from('0'),
+                    settlementToken: ethers.constants.AddressZero,
+                    price: BigNumber.from('0'),
+                    status: OrderStatus.NULL,
+                    seller: ethers.constants.AddressZero,
+                    buyer: ethers.constants.AddressZero,
+                };
+                expect(_orderStructToDict(await artWhaleMarketplace.orderDetails("0"))).to.deep.equal(expectedDetails);
+                expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedDetails);
+                
+                await artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC721,
+                    erc721.address,
+                    1,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                );
+                
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(1);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(1);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](4, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](3, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](2, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](1, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,4, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,3, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,2, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,1, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,4, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,3, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,2, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,1, 0, 10)).orderIds).to.deep.equal([]);
 
-                    await erc721.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
-        
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(0);
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(0);
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(0);
-                    const expectedDetails = {
-                        orderId: BigNumber.from('0'),
-                        nftStandart: NFTStandart.NULL,
-                        tokenContract: ethers.constants.AddressZero,
-                        tokenId: BigNumber.from('0'),
-                        tokenAmount: BigNumber.from('0'),
-                        settlementToken: ethers.constants.AddressZero,
-                        price: BigNumber.from('0'),
-                        status: OrderStatus.NULL,
-                        seller: ethers.constants.AddressZero,
-                        buyer: ethers.constants.AddressZero,
-                    };
-                    expect(_orderStructToDict(await artWhaleMarketplace.orderDetails("0"))).to.deep.equal(expectedDetails);
-                    expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedDetails);
-                    
-                    await artWhaleMarketplace.connect(signers[1]).createOrder(
-                        NFTStandart.ERC721,
-                        erc721.address,
-                        1,
-                        1,
-                        erc20.address,
-                        orderPrice,
-                        OrderType.P2P
-                    );
-                    
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(1);
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(0);
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
-                    expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(1);
+                const expectedResults = {
+                    orderId: BigNumber.from('0'),
+                    nftStandart: NFTStandart.ERC721,
+                    tokenContract: erc721.address,
+                    tokenId: BigNumber.from('1'),
+                    tokenAmount: BigNumber.from('1'),
+                    settlementToken: erc20.address,
+                    price: orderPrice,
+                    status: OrderStatus.OPEN,
+                    seller: signers[1].address,
+                    buyer: ethers.constants.AddressZero,
+                };
+                expect(_orderStructToDict(await artWhaleMarketplace.orderDetails(0))).to.deep.equal(expectedResults);
+                expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedResults);
+                
+                //
+                // negative cases
+                //
 
-                    const expectedResults = {
-                        orderId: BigNumber.from('0'),
-                        nftStandart: NFTStandart.ERC721,
-                        tokenContract: erc721.address,
-                        tokenId: BigNumber.from('1'),
-                        tokenAmount: BigNumber.from('1'),
-                        settlementToken: erc20.address,
-                        price: orderPrice,
-                        status: OrderStatus.OPEN,
-                        seller: signers[1].address,
-                        buyer: ethers.constants.AddressZero,
-                    };
-                    expect(_orderStructToDict(await artWhaleMarketplace.orderDetails(0))).to.deep.equal(expectedResults);
-                    expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedResults);
-                });
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.NULL,
+                    erc721.address,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong nft standart")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC721,
+                    ethers.constants.AddressZero,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: zero contract address")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC721,
+                    erc1155.address,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: nft not registered")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC721,
+                    erc721.address,
+                    0,
+                    2,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong token amount")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc721.address,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: nft not registered")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    0,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong token amount")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    1,
+                    ethers.constants.AddressZero,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: zero trade token address")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    1,
+                    signers[2].address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: settlement token not registered")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    1,
+                    erc20.address,
+                    0,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong price")
+            });
+            it('erc1155', async function () {
+                const orderPrice = ethers.utils.parseEther("100");
+
+                await erc1155.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
+    
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(0);
+                const expectedDetails = {
+                    orderId: BigNumber.from('0'),
+                    nftStandart: NFTStandart.NULL,
+                    tokenContract: ethers.constants.AddressZero,
+                    tokenId: BigNumber.from('0'),
+                    tokenAmount: BigNumber.from('0'),
+                    settlementToken: ethers.constants.AddressZero,
+                    price: BigNumber.from('0'),
+                    status: OrderStatus.NULL,
+                    seller: ethers.constants.AddressZero,
+                    buyer: ethers.constants.AddressZero,
+                };
+                expect(_orderStructToDict(await artWhaleMarketplace.orderDetails("0"))).to.deep.equal(expectedDetails);
+                expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedDetails);
+                
+                await artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    1,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                );
+                
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(1);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(1);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](4, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](3, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](2, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](1, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,4, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,3, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,2, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,1, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,4, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,3, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,2, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,1, 0, 10)).orderIds).to.deep.equal([]);
+
+                const expectedResults = {
+                    orderId: BigNumber.from('0'),
+                    nftStandart: NFTStandart.ERC1155,
+                    tokenContract: erc1155.address,
+                    tokenId: BigNumber.from('1'),
+                    tokenAmount: BigNumber.from('1'),
+                    settlementToken: erc20.address,
+                    price: orderPrice,
+                    status: OrderStatus.OPEN,
+                    seller: signers[1].address,
+                    buyer: ethers.constants.AddressZero,
+                };
+                expect(_orderStructToDict(await artWhaleMarketplace.orderDetails(0))).to.deep.equal(expectedResults);
+                expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedResults);
+                
+                //
+                // negative cases
+                //
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.NULL,
+                    erc1155.address,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong nft standart")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC721,
+                    ethers.constants.AddressZero,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: zero contract address")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc721.address,
+                    0,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: nft not registered")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    0,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong token amount")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    1,
+                    ethers.constants.AddressZero,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: zero trade token address")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    1,
+                    signers[2].address,
+                    orderPrice,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: settlement token not registered")
+
+                await expect(artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    0,
+                    1,
+                    erc20.address,
+                    0,
+                    OrderType.P2P
+                )).to.be.revertedWith("ArtWhaleMarketplace: wrong price")
+            });
+        });
+
+        describe('cancel order', () => {
+            it('erc721', async function () {
+                const orderPrice = ethers.utils.parseEther("100");
+
+                await erc721.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
+                await artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC721,
+                    erc721.address,
+                    1,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                );
+
+                //
+                // negative cases
+                //
+
+                await expect(artWhaleMarketplace.connect(
+                    signers[1]
+                ).cancelOrder(1)).to.be.revertedWith("ArtWhaleMarketplace: order does not exist");
+                await expect(artWhaleMarketplace.connect(
+                    signers[2]
+                ).cancelOrder(0)).to.be.revertedWith("ArtWhaleMarketplace: sender is not the seller");
+
+                //
+                // positive case
+                //
+
+                await artWhaleMarketplace.connect(signers[1]).cancelOrder(0);
+                
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(1);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(1);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(0);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.ANY, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.EXECUTED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.CANCELLED, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.OPEN, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.ANY, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.EXECUTED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.CANCELLED, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.OPEN, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.ANY, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.EXECUTED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.CANCELLED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.OPEN, 0, 10)).orderIds).to.deep.equal([]);
+
+                const expectedResults = {
+                    orderId: BigNumber.from('0'),
+                    nftStandart: NFTStandart.ERC721,
+                    tokenContract: erc721.address,
+                    tokenId: BigNumber.from('1'),
+                    tokenAmount: BigNumber.from('1'),
+                    settlementToken: erc20.address,
+                    price: orderPrice,
+                    status: OrderStatus.CANCELLED,
+                    seller: signers[1].address,
+                    buyer: ethers.constants.AddressZero,
+                };
+                expect(_orderStructToDict(await artWhaleMarketplace.orderDetails(0))).to.deep.equal(expectedResults);
+                expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedResults);
+
+                await expect(artWhaleMarketplace.connect(
+                    signers[2]
+                ).cancelOrder(0)).to.be.revertedWith("ArtWhaleMarketplace: only for open orders");
+            });
+            it('erc1155', async function () {
+                const orderPrice = ethers.utils.parseEther("100");
+
+                await erc1155.connect(signers[1]).setApprovalForAll(artWhaleMarketplace.address, true);
+                await artWhaleMarketplace.connect(signers[1]).createOrder(
+                    NFTStandart.ERC1155,
+                    erc1155.address,
+                    1,
+                    1,
+                    erc20.address,
+                    orderPrice,
+                    OrderType.P2P
+                );
+
+                //
+                // negative cases
+                //
+
+                await expect(artWhaleMarketplace.connect(
+                    signers[1]
+                ).cancelOrder(1)).to.be.revertedWith("ArtWhaleMarketplace: order does not exist");
+                await expect(artWhaleMarketplace.connect(
+                    signers[2]
+                ).cancelOrder(0)).to.be.revertedWith("ArtWhaleMarketplace: sender is not the seller");
+
+                //
+                // positive case
+                //
+
+                await artWhaleMarketplace.connect(signers[1]).cancelOrder(0);
+                
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.ANY)).to.equal(1);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.CANCELLED)).to.equal(1);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.EXECUTED)).to.equal(0);
+                expect(await artWhaleMarketplace.totalOrders(OrderStatus.OPEN)).to.equal(0);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect(await artWhaleMarketplace.orderType(0)).to.equal(OrderType.P2P);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.ANY, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.EXECUTED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.CANCELLED, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(uint8,uint256,uint256)"](OrderStatus.OPEN, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.ANY, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.EXECUTED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.CANCELLED, 0, 10)).orderIds).to.deep.equal([0]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[1].address,OrderStatus.OPEN, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.ANY, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.EXECUTED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.CANCELLED, 0, 10)).orderIds).to.deep.equal([]);
+                expect((await artWhaleMarketplace["fetchOrdersBy(address,uint8,uint256,uint256)"](signers[0].address,OrderStatus.OPEN, 0, 10)).orderIds).to.deep.equal([]);
+
+                const expectedResults = {
+                    orderId: BigNumber.from('0'),
+                    nftStandart: NFTStandart.ERC1155,
+                    tokenContract: erc1155.address,
+                    tokenId: BigNumber.from('1'),
+                    tokenAmount: BigNumber.from('1'),
+                    settlementToken: erc20.address,
+                    price: orderPrice,
+                    status: OrderStatus.CANCELLED,
+                    seller: signers[1].address,
+                    buyer: ethers.constants.AddressZero,
+                };
+                expect(_orderStructToDict(await artWhaleMarketplace.orderDetails(0))).to.deep.equal(expectedResults);
+                expect(_orderStructToDict((await artWhaleMarketplace.orderDetailsBatch(["0"]))[0])).to.deep.equal(expectedResults);
+
+                await expect(artWhaleMarketplace.connect(
+                    signers[2]
+                ).cancelOrder(0)).to.be.revertedWith("ArtWhaleMarketplace: only for open orders");
             });
         });
 
@@ -395,6 +791,13 @@ describe("ArtWhaleMarketplace", () => {
                 let balanceBeforeBuyer = await erc20.balanceOf(signers[2].address);
                 let balanceBeforeCreator = await erc20.balanceOf(signers[3].address);
 
+                // negative case
+                await expect(artWhaleMarketplace.connect(signers[1]).executeOrder(
+                    0,
+                    ethers.constants.AddressZero,
+                )).to.be.revertedWith("ArtWhaleMarketplace: not for seller");
+
+                // positive case
                 await artWhaleMarketplace.connect(signers[2]).executeOrder(
                     0,
                     ethers.constants.AddressZero
@@ -414,6 +817,16 @@ describe("ArtWhaleMarketplace", () => {
                 expect(await erc20.balanceOf(signers[3].address)).to.equal(
                     balanceBeforeCreator.add(ethers.utils.parseEther('0.01'))
                 );
+
+                // negative cases
+                await expect(artWhaleMarketplace.connect(signers[2]).executeOrder(
+                    2,
+                    ethers.constants.AddressZero,
+                )).to.be.revertedWith("ArtWhaleMarketplace: order does not exist");
+                await expect(artWhaleMarketplace.connect(signers[2]).executeOrder(
+                    0,
+                    ethers.constants.AddressZero,
+                )).to.be.revertedWith("ArtWhaleMarketplace: only for open orders");
             });
             it('only with royalty', async () => {
 
