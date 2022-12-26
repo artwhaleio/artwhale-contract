@@ -11,6 +11,5 @@ contract TokenOperatorUpgradeableMock is TokenOperatorUpgradeable {
         __TokenOperator_init();
     }
 
-    function onlyForOperator() external onlyOperator () {}
-
+    function onlyForOperator() external onlyOperator {}
 }

@@ -13,9 +13,7 @@ import "./token/ArtWhaleERC721.sol";
 import "./token/ArtWhaleERC1155.sol";
 import "./token/lib/RoyaltyUpgradeable.sol";
 
-contract ArtWhaleFactoryV1 is
-    ProxyAdmin
-{
+contract ArtWhaleFactoryV1 is ProxyAdmin {
     using AddressUpgradeable for address payable;
 
     event DeployArtWhaleERC721(
@@ -44,11 +42,16 @@ contract ArtWhaleFactoryV1 is
         string memory symbol_,
         address operator_,
         RoyaltyUpgradeable.RoyaltyInfo[] memory defaultRoyaltyInfo_
-    ) external onlyOwner returns(address) {
-        TransparentUpgradeableProxy newProxy = new TransparentUpgradeableProxy{salt: bytes32(salt_)}(
+    ) external onlyOwner returns (address) {
+        TransparentUpgradeableProxy newProxy = new TransparentUpgradeableProxy{
+            salt: bytes32(salt_)
+        }(
             implementation_,
             address(this),
-            abi.encodeCall(ArtWhaleERC721.initialize, (name_, symbol_, operator_, defaultRoyaltyInfo_))
+            abi.encodeCall(
+                ArtWhaleERC721.initialize,
+                (name_, symbol_, operator_, defaultRoyaltyInfo_)
+            )
         );
 
         emit DeployArtWhaleERC721(
@@ -71,11 +74,16 @@ contract ArtWhaleFactoryV1 is
         string memory uri_,
         address operator_,
         RoyaltyUpgradeable.RoyaltyInfo[] memory defaultRoyaltyInfo_
-    ) external onlyOwner returns(address) {
-        TransparentUpgradeableProxy newProxy = new TransparentUpgradeableProxy{salt: bytes32(salt_)}(
+    ) external onlyOwner returns (address) {
+        TransparentUpgradeableProxy newProxy = new TransparentUpgradeableProxy{
+            salt: bytes32(salt_)
+        }(
             implementation_,
             address(this),
-            abi.encodeCall(ArtWhaleERC1155.initialize, (name_, symbol_, uri_, operator_, defaultRoyaltyInfo_))
+            abi.encodeCall(
+                ArtWhaleERC1155.initialize,
+                (name_, symbol_, uri_, operator_, defaultRoyaltyInfo_)
+            )
         );
 
         emit DeployArtWhaleERC1155(

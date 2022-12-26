@@ -103,9 +103,9 @@ contract ArtWhaleMarketplace is
                 tokenAmount == 1,
                 "ArtWhaleMarketplace: wrong token amount"
             );
-        } else 
-        // if (nftStandart == NFTStandart.ERC1155) 
-        {
+        }
+        // if (nftStandart == NFTStandart.ERC1155)
+        else {
             require(
                 _whitelistErc1155.contains(tokenContract),
                 "ArtWhaleMarketplace: nft not registered"
@@ -154,9 +154,7 @@ contract ArtWhaleMarketplace is
                 address(this),
                 tokenId
             );
-        } else
-        if (nftStandart == NFTStandart.ERC1155) 
-        {
+        } else if (nftStandart == NFTStandart.ERC1155) {
             IERC1155Upgradeable(tokenContract).safeTransferFrom(
                 msg.sender,
                 address(this),
@@ -215,9 +213,9 @@ contract ArtWhaleMarketplace is
                 msg.sender,
                 order.tokenId
             );
-        } else 
-        // if (order.nftStandart == NFTStandart.ERC1155) 
-        {
+        }
+        // if (order.nftStandart == NFTStandart.ERC1155)
+        else {
             IERC1155Upgradeable(order.tokenContract).safeTransferFrom(
                 address(this),
                 msg.sender,
@@ -323,9 +321,9 @@ contract ArtWhaleMarketplace is
                 order.buyer,
                 order.tokenId
             );
-        } else 
-        // if (order.nftStandart == NFTStandart.ERC1155) 
-        {
+        }
+        // if (order.nftStandart == NFTStandart.ERC1155)
+        else {
             IERC1155Upgradeable(order.tokenContract).safeTransferFrom(
                 address(this),
                 order.buyer,
