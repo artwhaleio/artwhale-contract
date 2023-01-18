@@ -47,14 +47,12 @@ contract ArtWhaleFactoryV1 is ProxyAdmin {
             salt: bytes32(salt_)
         }(
             implementation_,
-            address(this),
+            msg.sender,
             abi.encodeCall(
                 ArtWhaleERC721.initialize,
                 (name_, symbol_, operator_, defaultRoyaltyInfo_)
             )
         );
-
-        newProxy.changeAdmin(msg.sender);
 
         emit DeployArtWhaleERC721(
             msg.sender,
@@ -81,14 +79,12 @@ contract ArtWhaleFactoryV1 is ProxyAdmin {
             salt: bytes32(salt_)
         }(
             implementation_,
-            address(this),
+            address(msg.sender),
             abi.encodeCall(
                 ArtWhaleERC1155.initialize,
                 (name_, symbol_, uri_, operator_, defaultRoyaltyInfo_)
             )
         );
-
-        newProxy.changeAdmin(msg.sender);
 
         emit DeployArtWhaleERC1155(
             msg.sender,
