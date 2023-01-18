@@ -46,12 +46,12 @@ describe("ArtWhaleERC1155", () => {
             }
         });
 
-        it("mint on demand", async () => {
+        it("mint on demand then burn", async () => {
 
             const value = {
                 target: signers[1].address,
                 tokenId: "0",
-                tokenAmount: "1",
+                tokenAmount: "2",
                 mintPrice: "0",
                 nonce: 0,
                 deadline: "2669291763",
@@ -62,16 +62,28 @@ describe("ArtWhaleERC1155", () => {
             await artWhaleERC1155.connect(signers[1]).mint(
                 signers[1].address,
                 "0",
-                "1",
+                "2",
                 "0",
                 "0",
                 "2669291763",
                 signature
             );
 
-            expect(await artWhaleERC1155.balanceOf(signers[1].address, 0)).to.be.equal("1");
-        });
+            expect(await artWhaleERC1155.balanceOf(signers[1].address, 0)).to.be.equal("2");
 
+            await artWhaleERC1155.connect(signers[1]).burn(
+                signers[1].address, 0, 1
+            );
+
+            expect(await artWhaleERC1155.balanceOf(signers[1].address, 0)).to.be.equal("1");
+
+            await artWhaleERC1155.connect(signers[1]).burnBatch(
+                signers[1].address, [0], [1]
+            );
+
+            expect(await artWhaleERC1155.balanceOf(signers[1].address, 0)).to.be.equal("0");
+        });
+        
         it("negative cases", async () => {
             // re-user nonce
             const value1 = {

@@ -24,7 +24,11 @@ async function main() {
     ]) as ArtWhaleERC1155;
     await token.deployed();
     console.log("ArtWhaleERC1155 deployed to:", token.address);
-  } else {
+  } else if (ARTWHALE_ERC1155_PROXY_UPGRADABLE_ADDRESS == "0x0000000000000000000000000000000000000001") {
+    let impl = await upgrades.deployImplementation(ArtWhaleERC1155Factory);
+    console.log("ArtWhaleERC1155Factory implementation", impl);
+  }
+  else {
     token = await upgrades.upgradeProxy(ARTWHALE_ERC1155_PROXY_UPGRADABLE_ADDRESS, ArtWhaleERC1155Factory);
     console.log("ArtWhaleERC1155 upgraded:", ARTWHALE_ERC1155_PROXY_UPGRADABLE_ADDRESS); 
   }
