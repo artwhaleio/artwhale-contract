@@ -54,6 +54,8 @@ contract ArtWhaleFactoryV1 is ProxyAdmin {
             )
         );
 
+        newProxy.changeAdmin(msg.sender);
+
         emit DeployArtWhaleERC721(
             msg.sender,
             address(newProxy),
@@ -85,6 +87,8 @@ contract ArtWhaleFactoryV1 is ProxyAdmin {
                 (name_, symbol_, uri_, operator_, defaultRoyaltyInfo_)
             )
         );
+
+        newProxy.changeAdmin(msg.sender);
 
         emit DeployArtWhaleERC1155(
             msg.sender,
